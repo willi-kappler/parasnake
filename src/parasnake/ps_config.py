@@ -9,6 +9,7 @@ This module defines the configuration for the server and the node.
 
 
 import json
+import base64
 
 import logging
 logger = logging.getLogger(__name__)
@@ -20,7 +21,9 @@ class PSConfiguration:
         self.server_address: str = "127.0.0.1"
         self.server_port: int = 3100
         self.heartbeat_timeout: int = 60 * 5
-        self.secret_key: str = secret_key
+
+        assert len(secret_key) == 32, f"Key must be exactly 32 bytes long: {secret_key}"
+        self.secret_key: bytes = base64.urlsafe_b64encode(secret_key.encode())
 
     @staticmethod
     def from_json(file_name):
@@ -35,7 +38,7 @@ class PSConfiguration:
         with open(file_name, "r") as f:
             data = json.load(f)
 
-        secret_key = data["secret_key"]
+        secret_key: str = data["secret_key"]
 
         config = PSConfiguration(secret_key)
 
