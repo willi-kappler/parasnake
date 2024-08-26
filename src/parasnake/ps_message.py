@@ -8,11 +8,15 @@ This module defines all the messages and how to decode and encode them.
 """
 
 
+# Python std modules:
 from typing import Any
 import pickle
 import lzma
 
+# External modules:
+from cryptography.fernet import Fernet
 
+# Locel modules:
 from parasnake.ps_nodeid import PSNodeId
 
 
@@ -29,16 +33,22 @@ PS_NODE_NEEDS_MORE_DATA = "node_needs_more_data"
 
 
 def encode_message(message: Any, secret_key: bytes) -> bytes:
+    f = Fernet(secret_key)
+
     msg_ser = pickle.dumps(message)
     msg_cmp = lzma.compress(msg_ser)
-    msg_enc = msg_cmp
-    return "Message!".encode()
+    msg_enc = f.encrypt(msg_cmp)
+
+    return msg_enc
 
 def decode_message(message: bytes, secret_key: bytes) -> Any:
-    # pickle.loads
-    # lzma.decompress
-    #
-    return "Message!".encode()
+    f = Fernet(secret_key)
+
+    msg_cmp = f.decrypt(message)
+    msg_ser = lzma.decompress(msg_cmp)
+    obj = pickle.loads(msg_ser)
+
+    return obj
 
 def ps_gen_heartbeat_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     msg = (PS_HEARTBEAT_MESSAGE, node_id)
