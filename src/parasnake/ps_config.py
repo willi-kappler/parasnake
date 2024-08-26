@@ -49,7 +49,8 @@ class PSConfiguration:
             config.server_port = data["server_port"]
 
         if "heartbeat_timeout" in data:
-            config.server_port = data["heartbeat_timeout"]
+            config.heartbeat_timeout = data["heartbeat_timeout"]
+            assert config.heartbeat_timeout > 9, f"Heartbeat timeout must be greater then 9 seconds: {config.heartbeat_timeout}"
 
         return config
 
