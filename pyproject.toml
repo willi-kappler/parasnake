@@ -1,0 +1,22 @@
+[project]
+version = "0.1"
+name = "Parasnake"
+requires-python = ">= 3.12"
+readme = "README.md"
+description = "Distributed number crunching with Python."
+maintainers = [
+  {name = "Willi Kappler", email = "grandor@gmx.de"}
+]
+authors = [
+  {name = "Willi Kappler", email = "grandor@gmx.de"},
+]
+keywords = ["distributed", "numeric", "network", "simulation", "computing"]
+license = {text = "MIT License"}
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12"
+]
+
+[project.urls]
+Repository = "https://github.com/willi-kappler/parasnake"
+

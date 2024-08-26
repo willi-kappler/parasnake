@@ -1,2 +1,3 @@
-# parasnake
-Distributed number crunching with Python
+# Parasnake
+Distributed number crunching with Python.
+
