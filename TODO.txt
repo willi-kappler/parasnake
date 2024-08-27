@@ -1,4 +1,6 @@
-- finish server
+
+TODO:
+
 - write test cases for configuration
 - write test cases for node id
 - write test cases for messages
@@ -9,4 +11,6 @@
 - store error message in node and log it on exit if not empty.
 - store error message in server and log it on exit if not empty.
 
+DONE:
+# finish server
 
