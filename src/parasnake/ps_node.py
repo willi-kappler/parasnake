@@ -60,42 +60,36 @@ class PSNode:
         need_more_data_message = ps_msg.ps_gen_need_more_data_message(self.node_id, self.secret_key)
         init_message = ps_msg.ps_gen_init_message(self.node_id, self.secret_key)
 
-        msg = self.ps_send_msg_return_answer(init_message)
-
-        match msg:
-            case (ps_msg.PS_INIT_OK, data):
-                logger.debug("Init node OK.")
-                self.ps_init(data)
-            case ps_msg.PS_INIT_ERROR:
-                logger.error("Init node failed!")
-                return
-            case ps_msg.PS_QUIT:
-                logger.debug("Job finished.")
-                return
-            case _:
-                logger.error("Received unknown message from server!")
-                return
+        msg = None
+        new_result = None
+        mode: str = "init"
 
         while True:
-            msg = self.ps_send_msg_return_answer(need_more_data_message)
+            match mode:
+                case "init":
+                    msg = self.ps_send_msg_return_answer(init_message)
+                case "need_data":
+                    msg = self.ps_send_msg_return_answer(need_more_data_message)
+                case "has_data":
+                    result_msg = ps_msg.ps_gen_result_message(self.node_id, self.secret_key, new_result)
+                    msg = self.ps_send_msg_return_answer(result_msg)
 
             match msg:
+                case (ps_msg.PS_INIT_OK, data):
+                    logger.debug("Init node OK.")
+                    self.ps_init(data)
+                    mode = "need_data"
+                case ps_msg.PS_INIT_ERROR:
+                    logger.error("Init node failed!")
+                    break
                 case (ps_msg.PS_NEW_DATA_FROM_SERVER, new_data):
                     logger.debug("Received new data from server.")
                     new_result = self.ps_process_data(new_data)
                     logger.debug("New data has been processed.")
-                    result_msg = ps_msg.ps_gen_result_message(self.node_id, self.secret_key, new_result)
-                    msg = self.ps_send_msg_return_answer(result_msg)
-
-                    match msg:
-                        case ps_msg.PS_RESULT_OK:
-                            logger.debug("New processed data has been sent to server.")
-                        case ps_msg.PS_QUIT:
-                            logger.debug("Job finished.")
-                            break
-                        case _:
-                            logger.error("Received unknown message from server!")
-                            break
+                    mode = "has_data"
+                case ps_msg.PS_RESULT_OK:
+                    logger.debug("New processed data has been sent to server.")
+                    mode = "need_data"
                 case ps_msg.PS_QUIT:
                     logger.debug("Job finished.")
                     break
