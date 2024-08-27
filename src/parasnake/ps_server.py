@@ -26,10 +26,11 @@ class PDServer:
         self.heartbeat_timeout: int = configuration.heartbeat_timeout
         self.all_nodes = {}
         self.quit: bool = False
+        self.quit_counter: int = 10
 
     def ps_run(self):
-        logger.info("Starting server with port: {self.server_port}")
-        logger.debug(f"Heartbeat timeout: {self.heartbeat_timeout}")
+        logger.info("Starting server with port: {self.server_port}.")
+        logger.debug(f"Heartbeat timeout: {self.heartbeat_timeout}.")
 
         asyncio.run(self.ps_main_loop())
 
@@ -38,10 +39,14 @@ class PDServer:
         logger.info("Will exit server now.")
 
     def ps_register_new_node(self, node_id: PSNodeId):
-        pass
+        logger.debug("Register new node.")
+        now: float = time.time()
+        self.all_nodes[node_id] = now
 
     def ps_update_node_time(self, node_id: PSNodeId):
-        pass
+        logger.debug("Update node time.")
+        now: float = time.time()
+        self.all_nodes[node_id] = now
 
     async def ps_handle_node(self, reader, writer):
         logger.debug("Connection from node.")
@@ -51,24 +56,35 @@ class PDServer:
         data = await reader.read()
         msg = ps_msg.decode_message(data, self.secret_key)
 
+        if self.quit:
+            writer.write(ps_msg.ps_gen_quit_message(self.secret_key))
+            await writer.drain()
+            return
+
         match msg:
             case (ps_msg.PS_INIT_MESSAGE, node_id):
+                logger.debug("Init message.")
                 self.ps_register_new_node(node_id)
                 init_data = self.ps_get_init_data()
                 writer.write(ps_msg.ps_gen_init_message_ok(init_data, self.secret_key))
                 await writer.drain()
             case (ps_msg.PS_HEARTBEAT_MESSAGE, node_id):
+                logger.debug("Heartbeat message.")
                 self.ps_update_node_time(node_id)
                 writer.write(ps_msg.ps_gen_heartbeat_message_ok(self.secret_key))
                 await writer.drain()
             case (ps_msg.PS_NODE_NEEDS_MORE_DATA, node_id):
+                logger.debug("Node needs more data.")
                 self.ps_update_node_time(node_id)
                 new_data = self.ps_get_new_data(node_id)
                 writer.write(ps_msg.ps_gen_new_data_message(new_data, self.secret_key))
                 await writer.drain()
             case (ps_msg.PS_NEW_RESULT_FROM_NODE, node_id, result):
+                logger.debug("New result from node.")
                 self.ps_update_node_time(node_id)
                 self.ps_process_result(node_id, result)
+                writer.write(ps_msg.ps_gen_result_ok_message(self.secret_key))
+                await writer.drain()
 
     async def ps_main_loop(self):
         logger.debug("Start main task.")
@@ -82,11 +98,14 @@ class PDServer:
             await asyncio.sleep(10)
 
             if self.quit:
-                break
+                self.quit_counter = self.quit_counter - 1
+                if self.quit_counter == 0:
+                    break
             else:
-                self.ps_check_heartbeat()
                 if self.ps_is_job_done():
                     self.quit = True
+                else:
+                    self.ps_check_heartbeat()
 
         logger.debug("Closing server connections...")
         server.close()
@@ -95,7 +114,7 @@ class PDServer:
     def ps_check_heartbeat(self):
         logger.debug("Check heartbeat of all nodes.")
 
-        now = time.time()
+        now: float = time.time()
 
         for k, v in self.all_nodes.items():
             if int(now - v + 1.0) > self.heartbeat_timeout:
