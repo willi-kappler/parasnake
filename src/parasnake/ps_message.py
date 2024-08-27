@@ -29,6 +29,7 @@ PS_INIT_OK = "init_ok"
 PS_INIT_ERROR = "init_error"
 PS_NEW_DATA_FROM_SERVER = "new_data_from_server"
 PS_NEW_RESULT_FROM_NODE = "new_result_from_node"
+PS_RESULT_OK = "result_ok"
 PS_NODE_NEEDS_MORE_DATA = "node_needs_more_data"
 
 
