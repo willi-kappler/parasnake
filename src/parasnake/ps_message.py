@@ -59,12 +59,20 @@ def ps_gen_heartbeat_message_ok(secret_key: bytes) -> bytes:
     msg = PS_HEARTBEAT_OK
     return encode_message(msg, secret_key)
 
+def ps_gen_heartbeat_message_error(secret_key: bytes) -> bytes:
+    msg = PS_HEARTBEAT_ERROR
+    return encode_message(msg, secret_key)
+
 def ps_gen_init_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     msg = (PS_INIT_MESSAGE, node_id)
     return encode_message(msg, secret_key)
 
 def ps_gen_init_message_ok(init_data: Any, secret_key: bytes) -> bytes:
     msg = (PS_INIT_OK, init_data)
+    return encode_message(msg, secret_key)
+
+def ps_gen_init_message_error(secret_key: bytes) -> bytes:
+    msg = PS_INIT_ERROR
     return encode_message(msg, secret_key)
 
 def ps_gen_result_message(node_id: PSNodeId, secret_key: bytes, new_data: Any) -> bytes:
