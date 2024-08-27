@@ -79,4 +79,12 @@ def ps_gen_new_data_message(new_data: Any, secret_key: bytes) -> bytes:
     msg = (PS_NEW_DATA_FROM_SERVER, new_data)
     return encode_message(msg, secret_key)
 
+def ps_gen_result_ok_message(secret_key: bytes) -> bytes:
+    msg = PS_RESULT_OK
+    return encode_message(msg, secret_key)
+
+def ps_gen_quit_message(secret_key: bytes) -> bytes:
+    msg = PS_QUIT
+    return encode_message(msg, secret_key)
+
 
