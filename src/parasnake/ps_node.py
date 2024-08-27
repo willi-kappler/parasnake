@@ -90,6 +90,9 @@ class PSNode:
                     match msg:
                         case ps_msg.PS_RESULT_OK:
                             logger.debug("New processed data has been sent to server.")
+                        case ps_msg.PS_QUIT:
+                            logger.debug("Job finished.")
+                            break
                         case _:
                             logger.error("Received unknown message from server!")
                             break
