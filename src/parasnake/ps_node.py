@@ -76,20 +76,32 @@ class PSNode:
 
             match msg:
                 case (ps_msg.PS_INIT_OK, data):
-                    logger.debug("Init node OK.")
-                    self.ps_init(data)
-                    mode = "need_data"
+                    if mode == "init":
+                        logger.debug("Init node OK.")
+                        self.ps_init(data)
+                        mode = "need_data"
+                    else:
+                        logger.error("Mode should be init: {mode}.")
+                        break
                 case ps_msg.PS_INIT_ERROR:
                     logger.error("Init node failed!")
                     break
                 case (ps_msg.PS_NEW_DATA_FROM_SERVER, new_data):
-                    logger.debug("Received new data from server.")
-                    new_result = self.ps_process_data(new_data)
-                    logger.debug("New data has been processed.")
-                    mode = "has_data"
+                    if mode == "need_data":
+                        logger.debug("Received new data from server.")
+                        new_result = self.ps_process_data(new_data)
+                        logger.debug("New data has been processed.")
+                        mode = "has_data"
+                    else:
+                        logger.error("Mode should be need_data: {mode}.")
+                        break
                 case ps_msg.PS_RESULT_OK:
-                    logger.debug("New processed data has been sent to server.")
-                    mode = "need_data"
+                    if mode == "has_data":
+                        logger.debug("New processed data has been sent to server.")
+                        mode = "need_data"
+                    else:
+                        logger.error("Mode should be has_data: {mode}")
+                        break
                 case ps_msg.PS_QUIT:
                     logger.debug("Job finished.")
                     break
