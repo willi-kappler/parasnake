@@ -64,27 +64,47 @@ class PDServer:
         match msg:
             case (ps_msg.PS_INIT_MESSAGE, node_id):
                 logger.debug("Init message.")
-                self.ps_register_new_node(node_id)
-                init_data = self.ps_get_init_data()
-                writer.write(ps_msg.ps_gen_init_message_ok(init_data, self.secret_key))
-                await writer.drain()
+                if node_id in self.all_nodes:
+                    logger.error("Node id already registered: {node_id}")
+                    writer.write(ps_msg.ps_gen_init_message_error(self.secret_key))
+                    await writer.drain()
+                else:
+                    self.ps_register_new_node(node_id)
+                    init_data = self.ps_get_init_data()
+                    writer.write(ps_msg.ps_gen_init_message_ok(init_data, self.secret_key))
+                    await writer.drain()
             case (ps_msg.PS_HEARTBEAT_MESSAGE, node_id):
                 logger.debug("Heartbeat message.")
-                self.ps_update_node_time(node_id)
-                writer.write(ps_msg.ps_gen_heartbeat_message_ok(self.secret_key))
-                await writer.drain()
+                if node_id in self.all_nodes:
+                    self.ps_update_node_time(node_id)
+                    writer.write(ps_msg.ps_gen_heartbeat_message_ok(self.secret_key))
+                    await writer.drain()
+                else:
+                    logger.error("Node id not registered yet: {node_id}")
+                    writer.write(ps_msg.ps_gen_heartbeat_message_error(self.secret_key))
+                    await writer.drain()
             case (ps_msg.PS_NODE_NEEDS_MORE_DATA, node_id):
                 logger.debug("Node needs more data.")
-                self.ps_update_node_time(node_id)
-                new_data = self.ps_get_new_data(node_id)
-                writer.write(ps_msg.ps_gen_new_data_message(new_data, self.secret_key))
-                await writer.drain()
+                if node_id in self.all_nodes:
+                    self.ps_update_node_time(node_id)
+                    new_data = self.ps_get_new_data(node_id)
+                    writer.write(ps_msg.ps_gen_new_data_message(new_data, self.secret_key))
+                    await writer.drain()
+                else:
+                    logger.error("Node id note registered yet: {node_id}")
+                    writer.write(ps_msg.ps_gen_init_message_error(self.secret_key))
+                    await writer.drain()
             case (ps_msg.PS_NEW_RESULT_FROM_NODE, node_id, result):
                 logger.debug("New result from node.")
-                self.ps_update_node_time(node_id)
-                self.ps_process_result(node_id, result)
-                writer.write(ps_msg.ps_gen_result_ok_message(self.secret_key))
-                await writer.drain()
+                if node_id in self.all_nodes:
+                    self.ps_update_node_time(node_id)
+                    self.ps_process_result(node_id, result)
+                    writer.write(ps_msg.ps_gen_result_ok_message(self.secret_key))
+                    await writer.drain()
+                else:
+                    logger.error("Node id note registered yet: {node_id}")
+                    writer.write(ps_msg.ps_gen_init_message_error(self.secret_key))
+                    await writer.drain()
 
     async def ps_main_loop(self):
         logger.debug("Start main task.")
