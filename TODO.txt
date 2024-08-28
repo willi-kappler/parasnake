@@ -1,16 +1,18 @@
 
 TODO:
 
-- write test cases for configuration
-- write test cases for node id
-- write test cases for messages
-- write test cases for node
-- write test cases for server
-- add mandel example
-- add other examples
+- write test cases for configuration.
+- write test cases for messages.
+- write test cases for node.
+- write test cases for server.
+- add mandel example.
+- add other examples.
 - store error message in node and log it on exit if not empty.
 - store error message in server and log it on exit if not empty.
 
+
 DONE:
 # finish server
+# add config option for quit_counter.
+# write test cases for node id.
 
