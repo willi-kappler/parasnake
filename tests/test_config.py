@@ -9,8 +9,19 @@ from parasnake.ps_config import PSConfiguration
 
 
 class TestNodeId(unittest.TestCase):
-    def test_(self):
-        pass
+    def test_init(self):
+        c = PSConfiguration("11111111222222223333333344444444")
+
+    def test_wrong_key_len(self):
+        with self.assertRaises(AssertionError):
+            c = PSConfiguration("")
+
+        with self.assertRaises(AssertionError):
+            c = PSConfiguration("1111111122222222333333334444444")
+
+        with self.assertRaises(AssertionError):
+            c = PSConfiguration("111111112222222233333333444444444")
+
 
 
 
