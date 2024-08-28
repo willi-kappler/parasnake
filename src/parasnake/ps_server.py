@@ -26,7 +26,7 @@ class PDServer:
         self.heartbeat_timeout: int = configuration.heartbeat_timeout
         self.all_nodes = {}
         self.quit: bool = False
-        self.quit_counter: int = 10
+        self.quit_counter: int = configuration.quit_counter
 
     def ps_run(self):
         logger.info("Starting server with port: {self.server_port}.")
