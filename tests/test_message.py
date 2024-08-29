@@ -90,7 +90,7 @@ class TestMessage(unittest.TestCase):
         id = PSNodeId()
         key = self.gen_key()
 
-        data = [33, False, "Some init data"]
+        data = [34, True, "Some more init data"]
         msg1 = psm.ps_gen_result_message(id, key, data)
         msg2 = psm.decode_message(msg1, key)
 
@@ -104,6 +104,31 @@ class TestMessage(unittest.TestCase):
         msg2 = psm.decode_message(msg1, key)
 
         self.assertEqual(msg2, (psm.PS_NODE_NEEDS_MORE_DATA, id))
+
+    def test_new_data_message(self):
+        key = self.gen_key()
+
+        data = ["First", 145, "Second", (True, False)]
+        msg1 = psm.ps_gen_new_data_message(data, key)
+        msg2 = psm.decode_message(msg1, key)
+
+        self.assertEqual(msg2, (psm.PS_NEW_DATA_FROM_SERVER, data))
+
+    def test_result_ok_message(self):
+        key = self.gen_key()
+
+        msg1 = psm.ps_gen_result_ok_message(key)
+        msg2 = psm.decode_message(msg1, key)
+
+        self.assertEqual(msg2, psm.PS_RESULT_OK)
+
+    def test_quit_message(self):
+        key = self.gen_key()
+
+        msg1 = psm.ps_gen_quit_message(key)
+        msg2 = psm.decode_message(msg1, key)
+
+        self.assertEqual(msg2, psm.PS_QUIT)
 
 
 if __name__ == "__main__":
