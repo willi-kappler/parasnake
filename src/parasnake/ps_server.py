@@ -21,7 +21,7 @@ import parasnake.ps_message as psm
 logger = logging.getLogger(__name__)
 
 
-class PDServer:
+class PSServer:
     def __init__(self, configuration: PSConfiguration):
         self.server_port: int = configuration.server_port
         self.secret_key: bytes = configuration.secret_key
