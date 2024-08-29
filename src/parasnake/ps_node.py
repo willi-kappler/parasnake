@@ -28,7 +28,7 @@ class PSNode:
         self.heartbeat_timeout: int = configuration.heartbeat_timeout
         self.node_id: PSNodeId = PSNodeId()
 
-    def ps_run(self):
+    def ps_run(self) -> None:
         logger.info("Starting node with node id: {self.node_id}.")
         logger.debug(f"Server address: {self.server_address}, port: {self.server_port}.")
         logger.debug(f"Heartbeat timeout: {self.heartbeat_timeout}")
@@ -37,7 +37,7 @@ class PSNode:
 
         logger.info("Will exit node now.")
 
-    async def ps_start_tasks(self):
+    async def ps_start_tasks(self) -> None:
         async with asyncio.TaskGroup() as tg:
             main_task = tg.create_task(self.ps_main_loop())
             main_task.set_name("MainTask")
@@ -59,7 +59,7 @@ class PSNode:
 
         return msg
 
-    async def ps_main_loop(self):
+    async def ps_main_loop(self) -> None:
         logger.debug("Start main task.")
         need_more_data_message = psm.ps_gen_need_more_data_message(self.node_id, self.secret_key)
         init_message = psm.ps_gen_init_message(self.node_id, self.secret_key)
@@ -113,7 +113,7 @@ class PSNode:
                     logger.error("Received unknown message from server!")
                     break
 
-    async def ps_send_heartbeat(self):
+    async def ps_send_heartbeat(self) -> None:
         logger.debug("Start heartbeat task.")
         heartbeat_message = psm.ps_gen_heartbeat_message(self.node_id, self.secret_key)
 
@@ -136,7 +136,7 @@ class PSNode:
                     logger.error("Received unknown message from server!")
                     break
 
-    def ps_init(self, data: Any):
+    def ps_init(self, data: Any) -> None:
         # Must be implemented by the user.
         pass
 
