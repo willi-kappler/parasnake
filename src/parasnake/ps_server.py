@@ -30,7 +30,7 @@ class PSServer:
         self.quit: bool = False
         self.quit_counter: int = configuration.quit_counter
 
-    def ps_run(self):
+    def ps_run(self) -> None:
         logger.info("Starting server with port: {self.server_port}.")
         logger.debug(f"Heartbeat timeout: {self.heartbeat_timeout}.")
 
@@ -40,17 +40,17 @@ class PSServer:
         self.ps_save_data()
         logger.info("Will exit server now.")
 
-    def ps_register_new_node(self, node_id: PSNodeId):
+    def ps_register_new_node(self, node_id: PSNodeId) -> None:
         logger.debug("Register new node.")
         now: float = time.time()
         self.all_nodes[node_id] = now
 
-    def ps_update_node_time(self, node_id: PSNodeId):
+    def ps_update_node_time(self, node_id: PSNodeId) -> None:
         logger.debug("Update node time.")
         now: float = time.time()
         self.all_nodes[node_id] = now
 
-    async def ps_handle_node(self, reader, writer):
+    async def ps_handle_node(self, reader, writer) -> None:
         logger.debug("Connection from node.")
 
         # https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor
@@ -72,7 +72,7 @@ class PSServer:
                     await writer.drain()
                 else:
                     self.ps_register_new_node(node_id)
-                    init_data = self.ps_get_init_data()
+                    init_data = self.ps_get_init_data(node_id)
                     writer.write(psm.ps_gen_init_message_ok(init_data, self.secret_key))
                     await writer.drain()
             case (psm.PS_HEARTBEAT_MESSAGE, node_id):
@@ -108,7 +108,7 @@ class PSServer:
                     writer.write(psm.ps_gen_init_message_error(self.secret_key))
                     await writer.drain()
 
-    async def ps_main_loop(self):
+    async def ps_main_loop(self) -> None:
         logger.debug("Start main task.")
 
         server = await asyncio.start_server(self.ps_handle_node, "0.0.0.0", self.server_port)
@@ -133,7 +133,7 @@ class PSServer:
         server.close()
         await server.wait_closed()
 
-    def ps_check_heartbeat(self):
+    def ps_check_heartbeat(self) -> None:
         logger.debug("Check heartbeat of all nodes.")
 
         now: float = time.time()
@@ -142,7 +142,7 @@ class PSServer:
             if int(now - v + 1.0) > self.heartbeat_timeout:
                 self.ps_node_timeout(k)
 
-    def ps_get_init_data(self) -> Any:
+    def ps_get_init_data(self, node_id: PSNodeId) -> Any:
         # Must be implemented by the user.
         return None
 
@@ -150,11 +150,11 @@ class PSServer:
         # Must be implemented by the user.
         return False
 
-    def ps_save_data(self):
+    def ps_save_data(self) -> None:
         # Must be implemented by the user.
         pass
 
-    def ps_node_timeout(self, node_id: PSNodeId):
+    def ps_node_timeout(self, node_id: PSNodeId) -> None:
         # Must be implemented by the user.
         pass
 
