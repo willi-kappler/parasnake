@@ -9,6 +9,7 @@ import uuid
 
 from parasnake.ps_nodeid import PSNodeId
 
+
 class TestNodeId(unittest.TestCase):
     def test_equality(self):
         id1 = PSNodeId()
@@ -50,6 +51,7 @@ class TestNodeId(unittest.TestCase):
         s = f"{id1}"
 
         self.assertEqual(s, "PSNodeId(11111111-cccc-cccc-5555-5555aaaaaaaa)")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -7,16 +7,18 @@
 This module defines the node class that does the computation (number crunching).
 """
 
-
-
+# Python std modules:
 import asyncio
 from typing import Any
 import logging
-logger = logging.getLogger(__name__)
 
+# Local modules:
 from parasnake.ps_config import PSConfiguration
 from parasnake.ps_nodeid import PSNodeId
-import parasnake.ps_message as ps_msg
+import parasnake.ps_message as psm
+
+logger = logging.getLogger(__name__)
+
 
 class PSNode:
     def __init__(self, configuration: PSConfiguration):
@@ -38,7 +40,9 @@ class PSNode:
     async def ps_start_tasks(self):
         async with asyncio.TaskGroup() as tg:
             main_task = tg.create_task(self.ps_main_loop())
+            main_task.set_name("MainTask")
             heartbeat_task = tg.create_task(self.ps_send_heartbeat())
+            heartbeat_task.set_name("HeartbeatTask")
 
     async def ps_send_msg_return_answer(self, msg: bytes) -> Any:
         logger.debug("Send message to server.")
@@ -50,15 +54,15 @@ class PSNode:
         await writer.wait_closed()
 
         data = await reader.read()
-        msg = ps_msg.decode_message(data, self.secret_key)
+        msg = psm.decode_message(data, self.secret_key)
         logger.debug("Received message from server.")
 
         return msg
 
     async def ps_main_loop(self):
         logger.debug("Start main task.")
-        need_more_data_message = ps_msg.ps_gen_need_more_data_message(self.node_id, self.secret_key)
-        init_message = ps_msg.ps_gen_init_message(self.node_id, self.secret_key)
+        need_more_data_message = psm.ps_gen_need_more_data_message(self.node_id, self.secret_key)
+        init_message = psm.ps_gen_init_message(self.node_id, self.secret_key)
 
         msg = None
         new_result = None
@@ -71,11 +75,11 @@ class PSNode:
                 case "need_data":
                     msg = self.ps_send_msg_return_answer(need_more_data_message)
                 case "has_data":
-                    result_msg = ps_msg.ps_gen_result_message(self.node_id, self.secret_key, new_result)
+                    result_msg = psm.ps_gen_result_message(self.node_id, self.secret_key, new_result)
                     msg = self.ps_send_msg_return_answer(result_msg)
 
             match msg:
-                case (ps_msg.PS_INIT_OK, data):
+                case (psm.PS_INIT_OK, data):
                     if mode == "init":
                         logger.debug("Init node OK.")
                         self.ps_init(data)
@@ -83,10 +87,10 @@ class PSNode:
                     else:
                         logger.error("Mode should be init: {mode}.")
                         break
-                case ps_msg.PS_INIT_ERROR:
+                case psm.PS_INIT_ERROR:
                     logger.error("Init node failed!")
                     break
-                case (ps_msg.PS_NEW_DATA_FROM_SERVER, new_data):
+                case (psm.PS_NEW_DATA_FROM_SERVER, new_data):
                     if mode == "need_data":
                         logger.debug("Received new data from server.")
                         new_result = self.ps_process_data(new_data)
@@ -95,14 +99,14 @@ class PSNode:
                     else:
                         logger.error("Mode should be need_data: {mode}.")
                         break
-                case ps_msg.PS_RESULT_OK:
+                case psm.PS_RESULT_OK:
                     if mode == "has_data":
                         logger.debug("New processed data has been sent to server.")
                         mode = "need_data"
                     else:
                         logger.error("Mode should be has_data: {mode}")
                         break
-                case ps_msg.PS_QUIT:
+                case psm.PS_QUIT:
                     logger.debug("Job finished.")
                     break
                 case _:
@@ -111,7 +115,7 @@ class PSNode:
 
     async def ps_send_heartbeat(self):
         logger.debug("Start heartbeat task.")
-        heartbeat_message = ps_msg.ps_gen_heartbeat_message(self.node_id, self.secret_key)
+        heartbeat_message = psm.ps_gen_heartbeat_message(self.node_id, self.secret_key)
 
         while True:
             await asyncio.sleep(self.heartbeat_timeout)
@@ -120,12 +124,12 @@ class PSNode:
             msg = self.ps_send_msg_return_answer(heartbeat_message)
 
             match msg:
-                case ps_msg.PS_HEARTBEAT_OK:
+                case psm.PS_HEARTBEAT_OK:
                     logger.debug("Heartbeat OK.")
-                case ps_msg.PS_HEARTBEAT_ERROR:
+                case psm.PS_HEARTBEAT_ERROR:
                     logger.debug("Heartbeat Error!")
                     break
-                case ps_msg.PS_QUIT:
+                case psm.PS_QUIT:
                     logger.debug("Job finished, quit.")
                     break
                 case _:

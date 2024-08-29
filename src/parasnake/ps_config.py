@@ -7,13 +7,11 @@
 This module defines the configuration for the server and the node.
 """
 
-
 import json
 import base64
 
 import logging
 logger = logging.getLogger(__name__)
-
 
 
 class PSConfiguration:
@@ -52,7 +50,8 @@ class PSConfiguration:
 
         if "heartbeat_timeout" in data:
             config.heartbeat_timeout = data["heartbeat_timeout"]
-            assert config.heartbeat_timeout > 9, f"Heartbeat timeout must be greater then 9 seconds: {config.heartbeat_timeout}"
+            assert config.heartbeat_timeout > 9, \
+                f"Heartbeat timeout must be greater then 9 seconds: {config.heartbeat_timeout}"
 
         if "quit_counter" in data:
             config.quit_counter = data["quit_counter"]

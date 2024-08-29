@@ -16,7 +16,7 @@ import lzma
 # External modules:
 from cryptography.fernet import Fernet
 
-# Locel modules:
+# Local modules:
 from parasnake.ps_nodeid import PSNodeId
 
 
@@ -42,6 +42,7 @@ def encode_message(message: Any, secret_key: bytes) -> bytes:
 
     return msg_enc
 
+
 def decode_message(message: bytes, secret_key: bytes) -> Any:
     f = Fernet(secret_key)
 
@@ -51,45 +52,56 @@ def decode_message(message: bytes, secret_key: bytes) -> Any:
 
     return obj
 
+
 def ps_gen_heartbeat_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     msg = (PS_HEARTBEAT_MESSAGE, node_id)
     return encode_message(msg, secret_key)
+
 
 def ps_gen_heartbeat_message_ok(secret_key: bytes) -> bytes:
     msg = PS_HEARTBEAT_OK
     return encode_message(msg, secret_key)
 
+
 def ps_gen_heartbeat_message_error(secret_key: bytes) -> bytes:
     msg = PS_HEARTBEAT_ERROR
     return encode_message(msg, secret_key)
+
 
 def ps_gen_init_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     msg = (PS_INIT_MESSAGE, node_id)
     return encode_message(msg, secret_key)
 
+
 def ps_gen_init_message_ok(init_data: Any, secret_key: bytes) -> bytes:
     msg = (PS_INIT_OK, init_data)
     return encode_message(msg, secret_key)
+
 
 def ps_gen_init_message_error(secret_key: bytes) -> bytes:
     msg = PS_INIT_ERROR
     return encode_message(msg, secret_key)
 
+
 def ps_gen_result_message(node_id: PSNodeId, secret_key: bytes, new_data: Any) -> bytes:
     msg = (PS_NEW_RESULT_FROM_NODE, node_id, new_data)
     return encode_message(msg, secret_key)
+
 
 def ps_gen_need_more_data_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     msg = (PS_NODE_NEEDS_MORE_DATA, node_id)
     return encode_message(msg, secret_key)
 
+
 def ps_gen_new_data_message(new_data: Any, secret_key: bytes) -> bytes:
     msg = (PS_NEW_DATA_FROM_SERVER, new_data)
     return encode_message(msg, secret_key)
 
+
 def ps_gen_result_ok_message(secret_key: bytes) -> bytes:
     msg = PS_RESULT_OK
     return encode_message(msg, secret_key)
+
 
 def ps_gen_quit_message(secret_key: bytes) -> bytes:
     msg = PS_QUIT

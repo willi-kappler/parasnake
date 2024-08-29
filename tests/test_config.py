@@ -17,6 +17,7 @@ class TestConfiguration(unittest.TestCase):
         """
 
         c: PSConfiguration = PSConfiguration("11111111222222223333333344444444")
+        del c
 
     def test_wrong_key_len(self):
         """
@@ -24,13 +25,16 @@ class TestConfiguration(unittest.TestCase):
         """
 
         with self.assertRaises(AssertionError):
-            c: PSConfiguration = PSConfiguration("")
+            c1: PSConfiguration = PSConfiguration("")
+            del c1
 
         with self.assertRaises(AssertionError):
-            c: PSConfiguration = PSConfiguration("1111111122222222333333334444444")
+            c2: PSConfiguration = PSConfiguration("1111111122222222333333334444444")
+            del c2
 
         with self.assertRaises(AssertionError):
-            c: PSConfiguration = PSConfiguration("111111112222222233333333444444444")
+            c3: PSConfiguration = PSConfiguration("111111112222222233333333444444444")
+            del c3
 
     def create_and_load_config(self, data: str) -> PSConfiguration:
         """
@@ -50,7 +54,6 @@ class TestConfiguration(unittest.TestCase):
             raise e
 
         return cfg
-
 
     def test_load_json1(self):
         """
@@ -97,6 +100,7 @@ class TestConfiguration(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
             cfg: PSConfiguration = self.create_and_load_config(data)
+            del cfg
 
     def test_load_json3(self):
         """
@@ -118,6 +122,7 @@ class TestConfiguration(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
             cfg: PSConfiguration = self.create_and_load_config(data)
+            del cfg
 
     def test_load_json4(self):
         """
@@ -139,6 +144,7 @@ class TestConfiguration(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
             cfg: PSConfiguration = self.create_and_load_config(data)
+            del cfg
 
 
 if __name__ == "__main__":
