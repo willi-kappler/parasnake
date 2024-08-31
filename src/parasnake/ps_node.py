@@ -48,15 +48,19 @@ class PSNode:
     async def ps_send_msg_return_answer(self, msg: bytes) -> Any:
         logger.debug("Send message to server.")
         reader, writer = await asyncio.open_connection(self.server_address, self.server_port)
+        #logger.debug("Connection opened.")
 
         writer.write(msg)
+        writer.write_eof()
         await writer.drain()
-        writer.close()
-        await writer.wait_closed()
+        #logger.debug("Message written.")
 
         data = await reader.read()
         msg = psm.decode_message(data, self.secret_key)
-        logger.debug("Received message from server.")
+        #logger.debug("Received message from server.")
+
+        writer.close()
+        await writer.wait_closed()
 
         return msg
 
