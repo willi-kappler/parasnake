@@ -4,6 +4,9 @@
 # See: https://github.com/willi-kappler/parasnake
 
 import unittest
+import asyncio
+import logging
+import pathlib
 from typing import Optional
 from time import sleep
 # import copy
@@ -13,6 +16,8 @@ from parasnake.ps_nodeid import PSNodeId
 from parasnake.ps_node import PSNode
 from parasnake.ps_server import PSServer
 from parasnake.ps_config import PSConfiguration
+
+logger = logging.getLogger(__name__)
 
 
 class WorkData:
@@ -29,6 +34,7 @@ class TestNode(PSNode):
         self.init_data = data
 
     def ps_process_data(self, data: int) -> int:
+        logger.debug("Process data: {data}")
         sleep(1.5)
         return data + 10
 
@@ -40,7 +46,7 @@ class TestServer(PSServer):
         self.active_nodes: dict[PSNodeId, int] = {}
         self.timeout_nodes: list[PSNodeId] = []
 
-        for _ in range(100):
+        for _ in range(10):
             self.job_data.append(WorkData())
 
     def ps_get_init_data(self, node_id: PSNodeId) -> int:
@@ -88,7 +94,7 @@ class TestServer(PSServer):
             self.job_data[index].value = result
 
 
-class TestCommunication(unittest.TestCase):
+class TestCommunication(unittest.IsolatedAsyncioTestCase):
     def gen_config(self) -> PSConfiguration:
         key = "test_key44444444ddddddddxxxxxxxx"
         config = PSConfiguration(key)
@@ -98,11 +104,34 @@ class TestCommunication(unittest.TestCase):
 
         return config
 
-    def test_init(self):
+    async def test_init(self):
         config = self.gen_config()
+        log_file_name: str = "communication.log"
+
+        logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
+        logger.info("Start test case test_init")
 
         node = TestNode(config)
         server = TestServer(config)
+
+        try:
+            async with asyncio.TaskGroup() as tg:
+                server_task = tg.create_task(server.ps_main_loop())
+                server_task.set_name("ServerTask")
+
+                await asyncio.sleep(2.0)
+
+                node_task = tg.create_task(node.ps_start_tasks())
+                node_task.set_name("NodeTask")
+        finally:
+            p: pathlib.Path = pathlib.Path(log_file_name)
+            p.unlink()
+
+
+        self.assertEqual(node.init_data, 10)
+
+        self.assertEqual(len(server.timeout_nodes), 0)
+        self.assertEqual(server.quit_counter, 0)
 
 
 if __name__ == "__main__":
