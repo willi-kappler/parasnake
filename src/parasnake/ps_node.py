@@ -74,12 +74,12 @@ class PSNode:
             while True:
                 match mode:
                     case "init":
-                        msg = self.ps_send_msg_return_answer(init_message)
+                        msg = await self.ps_send_msg_return_answer(init_message)
                     case "need_data":
-                        msg = self.ps_send_msg_return_answer(need_more_data_message)
+                        msg = await self.ps_send_msg_return_answer(need_more_data_message)
                     case "has_data":
                         result_msg = psm.ps_gen_result_message(self.node_id, self.secret_key, new_result)
-                        msg = self.ps_send_msg_return_answer(result_msg)
+                        msg = await self.ps_send_msg_return_answer(result_msg)
 
                 match msg:
                     case (psm.PS_INIT_OK, data):
