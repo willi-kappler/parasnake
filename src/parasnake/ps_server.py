@@ -10,6 +10,7 @@ This module defines all the server class that distributes the work load to each 
 # Python std modules:
 import time
 import asyncio
+from concurrent.futures import ProcessPoolExecutor
 from typing import Any, Optional
 import logging
 
@@ -54,6 +55,7 @@ class PSServer:
         logger.debug("Connection from node.")
 
         # https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.run_in_executor
+        loop = asyncio.get_running_loop()
 
         data = await reader.read()
         msg = psm.decode_message(data, self.secret_key)
@@ -63,50 +65,54 @@ class PSServer:
             await writer.drain()
             return
 
-        match msg:
-            case (psm.PS_INIT_MESSAGE, node_id):
-                logger.debug("Init message.")
-                if node_id in self.all_nodes:
-                    logger.error("Node id already registered: {node_id}")
-                    writer.write(psm.ps_gen_init_message_error(self.secret_key))
-                    await writer.drain()
-                else:
-                    self.ps_register_new_node(node_id)
-                    init_data = self.ps_get_init_data(node_id)
-                    writer.write(psm.ps_gen_init_message_ok(init_data, self.secret_key))
-                    await writer.drain()
-            case (psm.PS_HEARTBEAT_MESSAGE, node_id):
-                logger.debug("Heartbeat message.")
-                if node_id in self.all_nodes:
-                    self.ps_update_node_time(node_id)
-                    writer.write(psm.ps_gen_heartbeat_message_ok(self.secret_key))
-                    await writer.drain()
-                else:
-                    logger.error("Node id not registered yet: {node_id}")
-                    writer.write(psm.ps_gen_heartbeat_message_error(self.secret_key))
-                    await writer.drain()
-            case (psm.PS_NODE_NEEDS_MORE_DATA, node_id):
-                logger.debug("Node needs more data.")
-                if node_id in self.all_nodes:
-                    self.ps_update_node_time(node_id)
-                    new_data = self.ps_get_new_data(node_id)
-                    writer.write(psm.ps_gen_new_data_message(new_data, self.secret_key))
-                    await writer.drain()
-                else:
-                    logger.error("Node id note registered yet: {node_id}")
-                    writer.write(psm.ps_gen_init_message_error(self.secret_key))
-                    await writer.drain()
-            case (psm.PS_NEW_RESULT_FROM_NODE, node_id, result):
-                logger.debug("New result from node.")
-                if node_id in self.all_nodes:
-                    self.ps_update_node_time(node_id)
-                    self.ps_process_result(node_id, result)
-                    writer.write(psm.ps_gen_result_ok_message(self.secret_key))
-                    await writer.drain()
-                else:
-                    logger.error("Node id note registered yet: {node_id}")
-                    writer.write(psm.ps_gen_init_message_error(self.secret_key))
-                    await writer.drain()
+        with ProcessPoolExecutor() as pool:
+            match msg:
+                case (psm.PS_INIT_MESSAGE, node_id):
+                    logger.debug("Init message.")
+                    if node_id in self.all_nodes:
+                        logger.error("Node id already registered: {node_id}")
+                        writer.write(psm.ps_gen_init_message_error(self.secret_key))
+                        await writer.drain()
+                    else:
+                        self.ps_register_new_node(node_id)
+                        init_data = await loop.run_in_executor(pool, self.ps_get_init_data, node_id)
+                        #init_data = self.ps_get_init_data(node_id)
+                        writer.write(psm.ps_gen_init_message_ok(init_data, self.secret_key))
+                        await writer.drain()
+                case (psm.PS_HEARTBEAT_MESSAGE, node_id):
+                    logger.debug("Heartbeat message.")
+                    if node_id in self.all_nodes:
+                        self.ps_update_node_time(node_id)
+                        writer.write(psm.ps_gen_heartbeat_message_ok(self.secret_key))
+                        await writer.drain()
+                    else:
+                        logger.error("Node id not registered yet: {node_id}")
+                        writer.write(psm.ps_gen_heartbeat_message_error(self.secret_key))
+                        await writer.drain()
+                case (psm.PS_NODE_NEEDS_MORE_DATA, node_id):
+                    logger.debug("Node needs more data.")
+                    if node_id in self.all_nodes:
+                        self.ps_update_node_time(node_id)
+                        new_data = await loop.run_in_executor(pool, self.ps_get_new_data, node_id)
+                        #new_data = self.ps_get_new_data(node_id)
+                        writer.write(psm.ps_gen_new_data_message(new_data, self.secret_key))
+                        await writer.drain()
+                    else:
+                        logger.error("Node id note registered yet: {node_id}")
+                        writer.write(psm.ps_gen_init_message_error(self.secret_key))
+                        await writer.drain()
+                case (psm.PS_NEW_RESULT_FROM_NODE, node_id, result):
+                    logger.debug("New result from node.")
+                    if node_id in self.all_nodes:
+                        self.ps_update_node_time(node_id)
+                        await loop.run_in_executor(pool, self.ps_process_result, node_id, result)
+                        #self.ps_process_result(node_id, result)
+                        writer.write(psm.ps_gen_result_ok_message(self.secret_key))
+                        await writer.drain()
+                    else:
+                        logger.error("Node id note registered yet: {node_id}")
+                        writer.write(psm.ps_gen_init_message_error(self.secret_key))
+                        await writer.drain()
 
     async def ps_main_loop(self) -> None:
         logger.debug("Start main task.")

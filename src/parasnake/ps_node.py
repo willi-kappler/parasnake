@@ -9,6 +9,7 @@ This module defines the node class that does the computation (number crunching).
 
 # Python std modules:
 import asyncio
+from concurrent.futures import ProcessPoolExecutor
 from typing import Any
 import logging
 
@@ -64,60 +65,64 @@ class PSNode:
         need_more_data_message = psm.ps_gen_need_more_data_message(self.node_id, self.secret_key)
         init_message = psm.ps_gen_init_message(self.node_id, self.secret_key)
 
+        loop = asyncio.get_running_loop()
         msg = None
         new_result = None
         mode: str = "init"
 
-        while True:
-            match mode:
-                case "init":
-                    msg = self.ps_send_msg_return_answer(init_message)
-                case "need_data":
-                    msg = self.ps_send_msg_return_answer(need_more_data_message)
-                case "has_data":
-                    result_msg = psm.ps_gen_result_message(self.node_id, self.secret_key, new_result)
-                    msg = self.ps_send_msg_return_answer(result_msg)
+        with ProcessPoolExecutor() as pool:
+            while True:
+                match mode:
+                    case "init":
+                        msg = self.ps_send_msg_return_answer(init_message)
+                    case "need_data":
+                        msg = self.ps_send_msg_return_answer(need_more_data_message)
+                    case "has_data":
+                        result_msg = psm.ps_gen_result_message(self.node_id, self.secret_key, new_result)
+                        msg = self.ps_send_msg_return_answer(result_msg)
 
-            match msg:
-                case (psm.PS_INIT_OK, data):
-                    if mode == "init":
-                        logger.debug("Init node OK.")
-                        self.ps_init(data)
-                        mode = "need_data"
-                    else:
-                        logger.error("Mode should be init: {mode}.")
+                match msg:
+                    case (psm.PS_INIT_OK, data):
+                        if mode == "init":
+                            logger.debug("Init node OK.")
+                            self.ps_init(data)
+                            mode = "need_data"
+                        else:
+                            logger.error("Mode should be init: {mode}.")
+                            break
+                    case psm.PS_INIT_ERROR:
+                        logger.error("Init node failed!")
                         break
-                case psm.PS_INIT_ERROR:
-                    logger.error("Init node failed!")
-                    break
-                case (psm.PS_NEW_DATA_FROM_SERVER, new_data):
-                    if mode == "need_data":
-                        logger.debug("Received new data from server.")
-                        match new_data:
-                            case None:
-                                logger.debug("No more data to process! Waiting for other nodes to finish the job.")
-                                await asyncio.sleep(100.0)
-                                mode = "need_data"
-                            case _:
-                                new_result = self.ps_process_data(new_data)
-                                logger.debug("New data has been processed.")
-                                mode = "has_data"
-                    else:
-                        logger.error("Mode should be need_data: {mode}.")
+                    case (psm.PS_NEW_DATA_FROM_SERVER, new_data):
+                        if mode == "need_data":
+                            logger.debug("Received new data from server.")
+                            match new_data:
+                                case None:
+                                    logger.debug("No more data to process! Waiting for other nodes to finish the job.")
+                                    await asyncio.sleep(100.0)
+                                    mode = "need_data"
+                                case _:
+                                    # Process data in background task:
+                                    new_result = await loop.run_in_executor(pool, self.ps_process_data, new_data)
+                                    #new_result = self.ps_process_data(new_data)
+                                    logger.debug("New data has been processed.")
+                                    mode = "has_data"
+                        else:
+                            logger.error("Mode should be need_data: {mode}.")
+                            break
+                    case psm.PS_RESULT_OK:
+                        if mode == "has_data":
+                            logger.debug("New processed data has been sent to server.")
+                            mode = "need_data"
+                        else:
+                            logger.error("Mode should be has_data: {mode}")
+                            break
+                    case psm.PS_QUIT:
+                        logger.debug("Job finished.")
                         break
-                case psm.PS_RESULT_OK:
-                    if mode == "has_data":
-                        logger.debug("New processed data has been sent to server.")
-                        mode = "need_data"
-                    else:
-                        logger.error("Mode should be has_data: {mode}")
+                    case _:
+                        logger.error("Received unknown message from server!")
                         break
-                case psm.PS_QUIT:
-                    logger.debug("Job finished.")
-                    break
-                case _:
-                    logger.error("Received unknown message from server!")
-                    break
 
     async def ps_send_heartbeat(self) -> None:
         logger.debug("Start heartbeat task.")
