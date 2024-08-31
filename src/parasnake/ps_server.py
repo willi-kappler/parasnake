@@ -10,7 +10,7 @@ This module defines all the server class that distributes the work load to each 
 # Python std modules:
 import time
 import asyncio
-from typing import Any
+from typing import Any, Optional
 import logging
 
 # Local modules:
@@ -158,7 +158,7 @@ class PSServer:
         # Must be implemented by the user.
         pass
 
-    def ps_get_new_data(self, node_id: PSNodeId) -> Any:
+    def ps_get_new_data(self, node_id: PSNodeId) -> Optional[Any]:
         # Must be implemented by the user.
         return None
 

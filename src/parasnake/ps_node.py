@@ -93,9 +93,15 @@ class PSNode:
                 case (psm.PS_NEW_DATA_FROM_SERVER, new_data):
                     if mode == "need_data":
                         logger.debug("Received new data from server.")
-                        new_result = self.ps_process_data(new_data)
-                        logger.debug("New data has been processed.")
-                        mode = "has_data"
+                        match new_data:
+                            case None:
+                                logger.debug("No more data to process! Waiting for other nodes to finish the job.")
+                                await asyncio.sleep(100.0)
+                                mode = "need_data"
+                            case _:
+                                new_result = self.ps_process_data(new_data)
+                                logger.debug("New data has been processed.")
+                                mode = "has_data"
                     else:
                         logger.error("Mode should be need_data: {mode}.")
                         break
