@@ -48,10 +48,9 @@ class TestConfiguration(unittest.TestCase):
 
         try:
             cfg: PSConfiguration = PSConfiguration.from_json(config_file_name)
-        except Exception as e:
+        finally:
             p: pathlib.Path = pathlib.Path(config_file_name)
             p.unlink()
-            raise e
 
         return cfg
 
