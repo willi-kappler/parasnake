@@ -7,6 +7,7 @@ import unittest
 import asyncio
 import logging
 import pathlib
+import os
 from typing import Optional
 from time import sleep
 # import copy
@@ -34,7 +35,7 @@ class TestNode(PSNode):
         self.init_data = data
 
     def ps_process_data(self, data: int) -> int:
-        logger.debug("Process data: {data}")
+        logger.debug(f"Process data: {data}")
         sleep(1.5)
         return data + 10
 
@@ -63,6 +64,8 @@ class TestServer(PSServer):
         pass
 
     def ps_node_timeout(self, node_id: PSNodeId) -> None:
+        logger.debug(f"Timeout for node: {node_id}")
+
         index = self.active_nodes[node_id]
         # Give other nodes a chance to finish this job:
         self.job_data[index].assigned = False
@@ -73,14 +76,21 @@ class TestServer(PSServer):
         del self.active_nodes[node_id]
 
     def ps_get_new_data(self, node_id: PSNodeId) -> Optional[int]:
+        logger.info(f"Get new data, process id: {os.getpid()}")
+
         if node_id in self.active_nodes:
             index = self.active_nodes[node_id]
             value = self.job_data[index].value
+
+            logger.debug(f"Active node {node_id} found with index: {index} and value: {value}")
+
             if value < 100:
-                return self.job_data[index].value
+                return value
 
         for i, jd in enumerate(self.job_data):
             if not jd.assigned:
+                logger.debug(f"New index assigned for node {node_id}: {i}, value: {jd.value}")
+
                 self.active_nodes[node_id] = i
                 jd.assigned = True
                 return jd.value
@@ -90,6 +100,8 @@ class TestServer(PSServer):
 
     def ps_process_result(self, node_id: PSNodeId, result: int):
         if node_id in self.active_nodes:
+            logger.debug(f"Got result from active node: {node_id}, value: {result}")
+
             index = self.active_nodes[node_id]
             self.job_data[index].value = result
 
@@ -110,6 +122,7 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
         logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
         logger.info("Start test case test_init")
+        logger.info(f"Test case, process id: {os.getpid()}")
 
         node = TestNode(config)
         server = TestServer(config)
