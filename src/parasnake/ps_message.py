@@ -31,7 +31,7 @@ PS_NEW_DATA_FROM_SERVER = "new_data_from_server"
 PS_NEW_RESULT_FROM_NODE = "new_result_from_node"
 PS_RESULT_OK = "result_ok"
 PS_NODE_NEEDS_MORE_DATA = "node_needs_more_data"
-
+PS_CONNECTION_ERROR = "connection_error"
 
 def encode_message(message: Any, secret_key: bytes) -> bytes:
     f = Fernet(secret_key)
