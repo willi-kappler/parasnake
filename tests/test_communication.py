@@ -7,8 +7,7 @@ import unittest
 import asyncio
 import logging
 import pathlib
-import os
-from typing import Optional
+from typing import Optional, override
 from time import sleep
 # import copy
 # import uuid
@@ -31,12 +30,14 @@ class TestNode(PSNode):
         super().__init__(configuration)
         self.init_data: int = 0
 
+    @override
     def ps_init(self, data: int):
         self.init_data = data
 
-    def ps_process_data(self, data: int) -> int:
+    @override
+    async def ps_process_data(self, data: int) -> int:
         logger.debug(f"Process data: {data}")
-        sleep(1.5)
+        await asyncio.sleep(1.5)
         return data + 10
 
 
@@ -46,23 +47,28 @@ class TestServer(PSServer):
         self.job_data: list[WorkData] = []
         self.active_nodes: dict[PSNodeId, int] = {}
         self.timeout_nodes: list[PSNodeId] = []
+        self.max_value = 50
 
         for _ in range(10):
             self.job_data.append(WorkData())
 
-    def ps_get_init_data(self, node_id: PSNodeId) -> int:
+    @override
+    async def ps_get_init_data(self, node_id: PSNodeId) -> int:
         return 10
 
+    @override
     def ps_is_job_done(self) -> bool:
         for jd in self.job_data:
-            if jd.value < 100:
+            if jd.value < self.max_value:
                 return False
 
         return True
 
+    @override
     def ps_save_data(self) -> None:
         pass
 
+    @override
     def ps_node_timeout(self, node_id: PSNodeId) -> None:
         logger.debug(f"Timeout for node: {node_id}")
 
@@ -75,16 +81,15 @@ class TestServer(PSServer):
         # Node is no longer active.
         del self.active_nodes[node_id]
 
-    def ps_get_new_data(self, node_id: PSNodeId) -> Optional[int]:
-        logger.info(f"Get new data, process id: {os.getpid()}")
-
+    @override
+    async def ps_get_new_data(self, node_id: PSNodeId) -> Optional[int]:
         if node_id in self.active_nodes:
             index = self.active_nodes[node_id]
             value = self.job_data[index].value
 
             logger.debug(f"Active node {node_id} found with index: {index} and value: {value}")
 
-            if value < 100:
+            if value < self.max_value:
                 return value
 
         for i, jd in enumerate(self.job_data):
@@ -95,10 +100,14 @@ class TestServer(PSServer):
                 jd.assigned = True
                 return jd.value
 
+            # Let other coroutines run.
+            await asyncio.sleep(0)
+
         # No more data to distribute.
         return None
 
-    def ps_process_result(self, node_id: PSNodeId, result: int):
+    @override
+    async def ps_process_result(self, node_id: PSNodeId, result: int):
         if node_id in self.active_nodes:
             logger.debug(f"Got result from active node: {node_id}, value: {result}")
 
@@ -112,7 +121,7 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
         config = PSConfiguration(key)
 
         config.heartbeat_timeout = 10
-        config.quit_counter = 1
+        config.quit_counter = 3
 
         return config
 
@@ -122,7 +131,6 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
         logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
         logger.info("Start test case test_init")
-        logger.info(f"Test case, process id: {os.getpid()}")
 
         node = TestNode(config)
         server = TestServer(config)
