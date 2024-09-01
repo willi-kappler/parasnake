@@ -117,6 +117,7 @@ class PSServer:
             await asyncio.sleep(10)
 
             if self.quit:
+                logger.debug(f"Quit counter: {self.quit_counter}")
                 self.quit_counter = self.quit_counter - 1
                 if self.quit_counter == 0:
                     break
