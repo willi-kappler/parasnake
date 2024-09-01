@@ -102,7 +102,7 @@ class PSNode:
                         match new_data:
                             case None:
                                 logger.debug("No more data to process! Waiting for other nodes to finish the job.")
-                                await asyncio.sleep(100.0)
+                                await asyncio.sleep(10.0)
                                 mode = "need_data"
                             case _:
                                 new_result = await self.ps_process_data(new_data)
@@ -120,6 +120,9 @@ class PSNode:
                         break
                 case psm.PS_QUIT:
                     logger.debug("Job finished.")
+                    break
+                case psm.PS_CONNECTION_ERROR:
+                    logger.error("Connection error, will exit now.")
                     break
                 case _:
                     logger.error("Received unknown message from server!")
