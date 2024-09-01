@@ -121,7 +121,7 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
         config = PSConfiguration(key)
 
         config.heartbeat_timeout = 10
-        config.quit_counter = 3
+        config.quit_counter = 4
 
         return config
 
@@ -140,6 +140,7 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
                 server_task = tg.create_task(server.ps_main_loop())
                 server_task.set_name("ServerTask")
 
+                # Give the server some time to start up.
                 await asyncio.sleep(2.0)
 
                 node_task = tg.create_task(node.ps_start_tasks())
@@ -154,6 +155,9 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(server.timeout_nodes), 0)
         self.assertEqual(server.quit_counter, 0)
 
+        for jd in server.job_data:
+            self.assertTrue(jd.assigned)
+            self.assertEqual(jd.value, server.max_value)
 
 if __name__ == "__main__":
     unittest.main()
