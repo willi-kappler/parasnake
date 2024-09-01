@@ -136,7 +136,7 @@ class PSNode:
             await asyncio.sleep(self.heartbeat_timeout)
 
             logger.debug("Send heartbeat message to server.")
-            msg = self.ps_send_msg_return_answer(heartbeat_message)
+            msg = await self.ps_send_msg_return_answer(heartbeat_message)
 
             match msg:
                 case psm.PS_HEARTBEAT_OK:
