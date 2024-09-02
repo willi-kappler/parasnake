@@ -125,15 +125,15 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
         return config
 
-    async def test_init(self):
+    async def test_one_node(self):
         config = self.gen_config()
         log_file_name: str = "communication.log"
 
         logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
-        logger.info("Start test case test_init")
+        logger.info("Start test case test_one_node")
 
-        node = TestNode(config)
         server = TestServer(config)
+        node = TestNode(config)
 
         try:
             async with asyncio.TaskGroup() as tg:
@@ -158,6 +158,61 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
         for jd in server.job_data:
             self.assertTrue(jd.assigned)
             self.assertEqual(jd.value, server.max_value)
+
+    async def test_two_nodes(self):
+        config = self.gen_config()
+        log_file_name: str = "communication.log"
+
+        logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
+        logger.info("Start test case test_two_nodes")
+
+        server = TestServer(config)
+        node1 = TestNode(config)
+        node2 = TestNode(config)
+
+        try:
+            async with asyncio.TaskGroup() as tg:
+                server_task = tg.create_task(server.ps_main_loop())
+                server_task.set_name("ServerTask")
+
+                # Give the server some time to start up.
+                await asyncio.sleep(2.0)
+
+                node_task1 = tg.create_task(node1.ps_start_tasks())
+                node_task1.set_name("NodeTask1")
+
+                await asyncio.sleep(1.0)
+
+                node_task2 = tg.create_task(node2.ps_start_tasks())
+                node_task2.set_name("NodeTask2")
+        finally:
+            p: pathlib.Path = pathlib.Path(log_file_name)
+            p.unlink()
+
+
+        self.assertEqual(node1.init_data, 10)
+        self.assertEqual(node2.init_data, 10)
+
+        self.assertEqual(len(server.timeout_nodes), 0)
+        self.assertEqual(server.quit_counter, 0)
+
+        for jd in server.job_data:
+            self.assertTrue(jd.assigned)
+            self.assertEqual(jd.value, server.max_value)
+
+    async def test_heartbeat_error(self):
+        config = self.gen_config()
+        log_file_name: str = "communication.log"
+
+        logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
+        logger.info("Start test case test_heartbeat_error")
+
+        server = TestServer(config)
+        node1 = TestNode(config)
+        node2 = TestNode(config)
+
+        # TODO: Finish test case.
+
 
 if __name__ == "__main__":
     unittest.main()
