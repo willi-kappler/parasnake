@@ -8,7 +8,7 @@ import asyncio
 import logging
 import pathlib
 from typing import Optional, override
-from time import sleep
+#from time import sleep
 # import copy
 # import uuid
 
@@ -127,7 +127,7 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
     async def test_one_node(self):
         config = self.gen_config()
-        log_file_name: str = "communication.log"
+        log_file_name: str = "communication1.log"
 
         logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
         logger.info("Start test case test_one_node")
@@ -161,7 +161,7 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
     async def test_two_nodes(self):
         config = self.gen_config()
-        log_file_name: str = "communication.log"
+        log_file_name: str = "communication2.log"
 
         logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
         logger.info("Start test case test_two_nodes")
@@ -202,14 +202,14 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
     async def test_heartbeat_error(self):
         config = self.gen_config()
-        log_file_name: str = "communication.log"
+        log_file_name: str = "communication3.log"
 
         logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
         logger.info("Start test case test_heartbeat_error")
 
-        server = TestServer(config)
-        node1 = TestNode(config)
-        node2 = TestNode(config)
+        #server = TestServer(config)
+        #node1 = TestNode(config)
+        #node2 = TestNode(config)
 
         # TODO: Finish test case.
 
