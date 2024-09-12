@@ -127,28 +127,20 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
     async def test_one_node(self):
         config = self.gen_config()
-        log_file_name: str = "communication1.log"
-
-        logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
         logger.info("Start test case test_one_node")
 
         server = TestServer(config)
         node = TestNode(config)
 
-        try:
-            async with asyncio.TaskGroup() as tg:
-                server_task = tg.create_task(server.ps_main_loop())
-                server_task.set_name("ServerTask")
+        async with asyncio.TaskGroup() as tg:
+            server_task = tg.create_task(server.ps_main_loop())
+            server_task.set_name("ServerTask")
 
-                # Give the server some time to start up.
-                await asyncio.sleep(2.0)
+            # Give the server some time to start up.
+            await asyncio.sleep(2.0)
 
-                node_task = tg.create_task(node.ps_start_tasks())
-                node_task.set_name("NodeTask")
-        finally:
-            p: pathlib.Path = pathlib.Path(log_file_name)
-            p.unlink()
-
+            node_task = tg.create_task(node.ps_start_tasks())
+            node_task.set_name("NodeTask")
 
         self.assertEqual(node.init_data, 10)
 
@@ -161,33 +153,27 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
     async def test_two_nodes(self):
         config = self.gen_config()
-        log_file_name: str = "communication2.log"
 
-        logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
         logger.info("Start test case test_two_nodes")
 
         server = TestServer(config)
         node1 = TestNode(config)
         node2 = TestNode(config)
 
-        try:
-            async with asyncio.TaskGroup() as tg:
-                server_task = tg.create_task(server.ps_main_loop())
-                server_task.set_name("ServerTask")
+        async with asyncio.TaskGroup() as tg:
+            server_task = tg.create_task(server.ps_main_loop())
+            server_task.set_name("ServerTask")
 
-                # Give the server some time to start up.
-                await asyncio.sleep(2.0)
+            # Give the server some time to start up.
+            await asyncio.sleep(2.0)
 
-                node_task1 = tg.create_task(node1.ps_start_tasks())
-                node_task1.set_name("NodeTask1")
+            node_task1 = tg.create_task(node1.ps_start_tasks())
+            node_task1.set_name("NodeTask1")
 
-                await asyncio.sleep(1.0)
+            await asyncio.sleep(1.0)
 
-                node_task2 = tg.create_task(node2.ps_start_tasks())
-                node_task2.set_name("NodeTask2")
-        finally:
-            p: pathlib.Path = pathlib.Path(log_file_name)
-            p.unlink()
+            node_task2 = tg.create_task(node2.ps_start_tasks())
+            node_task2.set_name("NodeTask2")
 
 
         self.assertEqual(node1.init_data, 10)
@@ -202,9 +188,7 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
     async def test_heartbeat_error(self):
         config = self.gen_config()
-        log_file_name: str = "communication3.log"
 
-        logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
         logger.info("Start test case test_heartbeat_error")
 
         #server = TestServer(config)
@@ -215,5 +199,12 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    log_file_name: str = "communication.log"
+    logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
+
+    try:
+        unittest.main()
+    finally:
+        p: pathlib.Path = pathlib.Path(log_file_name)
+        p.unlink()
 
