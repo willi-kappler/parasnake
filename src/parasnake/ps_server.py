@@ -9,6 +9,7 @@ This module defines all the server class that distributes the work load to each 
 
 # Python std modules:
 import time
+import datetime
 import asyncio
 from typing import Any, Optional
 import logging
@@ -106,7 +107,9 @@ class PSServer:
         await writer.wait_closed()
 
     async def ps_main_loop(self) -> None:
-        logger.debug("Start main task.")
+        logger.debug("Start main server task.")
+        start_time = datetime.datetime.now()
+        logger.info(f"Starting now: {start_time}")
 
         server = await asyncio.start_server(self.ps_handle_node, "0.0.0.0", self.server_port)
 
@@ -130,6 +133,18 @@ class PSServer:
         logger.debug("Closing server connections...")
         server.close()
         await server.wait_closed()
+
+        end_time = datetime.datetime.now()
+        logger.info(f"Finished on: {end_time}")
+
+        time_taken = end_time - start_time
+        in_seconds = time_taken.total_seconds()
+        in_minutes = in_seconds / 60.0
+        in_hours = in_minutes / 60.0
+
+        logger.info(f"Time taken: in seconds: {in_seconds}")
+        logger.info(f"Time taken: in minutes: {in_minutes}")
+        logger.info(f"Time taken: in hours: {in_hours}")
 
     def ps_check_heartbeat(self) -> None:
         logger.debug("Check heartbeat of all nodes.")
