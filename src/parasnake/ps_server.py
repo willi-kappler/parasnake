@@ -13,6 +13,7 @@ import datetime
 import asyncio
 from typing import Any, Optional
 import logging
+import threading
 
 # Local modules:
 from parasnake.ps_config import PSConfiguration
@@ -30,6 +31,7 @@ class PSServer:
         self.all_nodes: dict[PSNodeId, float] = {}
         self.quit: bool = False
         self.quit_counter: int = configuration.quit_counter
+        self.lock: threading.Lock = threading.Lock()
 
     def ps_run(self) -> None:
         logger.info("Starting server with port: {self.server_port}.")
@@ -74,7 +76,7 @@ class PSServer:
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
                     else:
                         self.ps_register_new_node(node_id)
-                        init_data = await self.ps_get_init_data(node_id)
+                        init_data = await self.ps_get_init_data_thread(node_id)
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_ok(init_data, self.secret_key))
                 case (psm.PS_HEARTBEAT_MESSAGE, node_id):
                     logger.debug("Heartbeat message.")
@@ -88,7 +90,7 @@ class PSServer:
                     logger.debug("Node needs more data.")
                     if node_id in self.all_nodes:
                         self.ps_update_node_time(node_id)
-                        new_data = await self.ps_get_new_data(node_id)
+                        new_data = await self.ps_get_new_data_thread(node_id)
                         await self.ps_write_msg(writer, psm.ps_gen_new_data_message(new_data, self.secret_key))
                     else:
                         logger.error("Node id not registered yet: {node_id}")
@@ -97,7 +99,7 @@ class PSServer:
                     logger.debug("New result from node.")
                     if node_id in self.all_nodes:
                         self.ps_update_node_time(node_id)
-                        await self.ps_process_result(node_id, result)
+                        await self.ps_process_result_thread(node_id, result)
                         await self.ps_write_msg(writer, psm.ps_gen_result_ok_message(self.secret_key))
                     else:
                         logger.error("Node id not registered yet: {node_id}")
@@ -155,9 +157,30 @@ class PSServer:
             if int(now - v + 1.0) > self.heartbeat_timeout:
                 self.ps_node_timeout(k)
 
-    async def ps_get_init_data(self, node_id: PSNodeId) -> Any:
+    async def ps_get_init_data_thread(self, node_id: PSNodeId) -> Any:
+        return await asyncio.to_thread(self.ps_get_init_data_lock, node_id)
+
+    def ps_get_init_data_lock(self, node_id: PSNodeId) -> Any:
+        with self.lock:
+            return self.ps_get_init_data(node_id)
+
+    def ps_get_init_data(self, node_id: PSNodeId) -> Any:
         # Must be implemented by the user.
         return None
+
+    async def ps_get_new_data_thread(self, node_id: PSNodeId) -> Optional[Any]:
+        return await asyncio.to_thread(self.ps_get_new_data_lock, node_id)
+
+    def ps_get_new_data_lock(self, node_id: PSNodeId) -> Optional[Any]:
+        with self.lock:
+            return self.ps_get_new_data(node_id)
+
+    async def ps_process_result_thread(self, node_id: PSNodeId, result: Any):
+        await asyncio.to_thread(self.ps_process_result_lock, node_id, result)
+
+    def ps_process_result_lock(self, node_id: PSNodeId, result: Any):
+        with self.lock:
+            self.ps_process_result(node_id, result)
 
     def ps_is_job_done(self) -> bool:
         # Must be implemented by the user.
@@ -171,11 +194,11 @@ class PSServer:
         # Must be implemented by the user.
         pass
 
-    async def ps_get_new_data(self, node_id: PSNodeId) -> Optional[Any]:
+    def ps_get_new_data(self, node_id: PSNodeId) -> Optional[Any]:
         # Must be implemented by the user.
         return None
 
-    async def ps_process_result(self, node_id: PSNodeId, result: Any):
+    def ps_process_result(self, node_id: PSNodeId, result: Any):
         # Must be implemented by the user.
         pass
 

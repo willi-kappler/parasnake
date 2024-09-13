@@ -54,7 +54,7 @@ class TestServer(PSServer):
             self.job_data.append(WorkData())
 
     @override
-    async def ps_get_init_data(self, node_id: PSNodeId) -> int:
+    def ps_get_init_data(self, node_id: PSNodeId) -> int:
         return 10
 
     @override
@@ -84,7 +84,7 @@ class TestServer(PSServer):
             del self.active_nodes[node_id]
 
     @override
-    async def ps_get_new_data(self, node_id: PSNodeId) -> Optional[int]:
+    def ps_get_new_data(self, node_id: PSNodeId) -> Optional[int]:
         if node_id in self.active_nodes:
             index = self.active_nodes[node_id]
             value = self.job_data[index].value
@@ -102,14 +102,11 @@ class TestServer(PSServer):
                 jd.assigned = True
                 return jd.value
 
-            # Let other coroutines run.
-            await asyncio.sleep(0)
-
         # No more data to distribute.
         return None
 
     @override
-    async def ps_process_result(self, node_id: PSNodeId, result: int):
+    def ps_process_result(self, node_id: PSNodeId, result: int):
         if node_id in self.active_nodes:
             logger.debug(f"Got result from active node: {node_id}, value: {result}")
 

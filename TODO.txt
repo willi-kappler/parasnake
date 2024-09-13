@@ -8,10 +8,6 @@ TODO:
 - add more configuration options.
 
 
-- Use threading in server to handle client methods (get new data, handle result).
-  - Use a lock and a context manager: https://superfastpython.com/thread-context-manager/
-  - Or asyncio.to_thread() ? https://superfastpython.com/asyncio-to_thread/
-
 
 DONE:
 # finish server
@@ -22,5 +18,8 @@ DONE:
 # write test cases for node.
 # write test cases for server.
 # use threading for client (node): asyncio.to_thread()
+# Use threading in server to handle client methods (get new data, handle result).
+  # Or asyncio.to_thread() ? https://superfastpython.com/asyncio-to_thread/
+
 
 
