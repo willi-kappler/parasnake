@@ -7,6 +7,7 @@ import unittest
 import asyncio
 import logging
 import pathlib
+import time
 from typing import Optional, override
 #from time import sleep
 # import copy
@@ -35,9 +36,9 @@ class TestNode(PSNode):
         self.init_data = data
 
     @override
-    async def ps_process_data(self, data: int) -> int:
+    def ps_process_data(self, data: int) -> int:
         logger.debug(f"Process data: {data}")
-        await asyncio.sleep(1.5)
+        time.sleep(1.5)
         return data + 10
 
 

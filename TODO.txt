@@ -21,4 +21,6 @@ DONE:
 # write test cases for messages.
 # write test cases for node.
 # write test cases for server.
+# use threading for client (node): asyncio.to_thread()
+
 

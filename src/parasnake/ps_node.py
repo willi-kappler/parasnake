@@ -105,7 +105,7 @@ class PSNode:
                                 await asyncio.sleep(10.0)
                                 mode = "need_data"
                             case _:
-                                new_result = await self.ps_process_data(new_data)
+                                new_result = await self.ps_process_data_thread(new_data)
                                 logger.debug("New data has been processed.")
                                 mode = "has_data"
                     else:
@@ -151,12 +151,14 @@ class PSNode:
                     logger.error("Received unknown message from server!")
                     break
 
+    async def ps_process_data_thread(self, data: Any) -> Any:
+        return await asyncio.to_thread(self.ps_process_data, data)
+
     def ps_init(self, data: Any) -> None:
         # Must be implemented by the user.
         pass
 
-    async def ps_process_data(self, data: Any) -> Any:
+    def ps_process_data(self, data: Any) -> Any:
         # Must be implemented by the user.
         pass
-
 
