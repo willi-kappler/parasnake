@@ -91,7 +91,7 @@ class PSServer:
                         new_data = await self.ps_get_new_data(node_id)
                         await self.ps_write_msg(writer, psm.ps_gen_new_data_message(new_data, self.secret_key))
                     else:
-                        logger.error("Node id note registered yet: {node_id}")
+                        logger.error("Node id not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
                 case (psm.PS_NEW_RESULT_FROM_NODE, node_id, result):
                     logger.debug("New result from node.")
@@ -100,7 +100,7 @@ class PSServer:
                         await self.ps_process_result(node_id, result)
                         await self.ps_write_msg(writer, psm.ps_gen_result_ok_message(self.secret_key))
                     else:
-                        logger.error("Node id note registered yet: {node_id}")
+                        logger.error("Node id not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
 
         writer.close()
