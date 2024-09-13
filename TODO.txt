@@ -1,13 +1,16 @@
 
 TODO:
 
-- write test cases for node.
-- write test cases for server.
 - add mandel example.
 - add other examples.
 - store error message in node and log it on exit if not empty.
 - store error message in server and log it on exit if not empty.
 - add more configuration options.
+
+
+- Use threading in server to handle client methods (get new data, handle result).
+  - Use a lock and a context manager: https://superfastpython.com/thread-context-manager/
+  - Or asyncio.to_thread() ? https://superfastpython.com/asyncio-to_thread/
 
 
 DONE:
@@ -16,4 +19,6 @@ DONE:
 # write test cases for node id.
 # write test cases for configuration.
 # write test cases for messages.
+# write test cases for node.
+# write test cases for server.
 
