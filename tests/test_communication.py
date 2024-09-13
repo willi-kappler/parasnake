@@ -72,14 +72,15 @@ class TestServer(PSServer):
     def ps_node_timeout(self, node_id: PSNodeId) -> None:
         logger.debug(f"Timeout for node: {node_id}")
 
-        index = self.active_nodes[node_id]
-        # Give other nodes a chance to finish this job:
-        self.job_data[index].assigned = False
+        if node_id in self.active_nodes:
+            index = self.active_nodes[node_id]
+            # Give other nodes a chance to finish this job:
+            self.job_data[index].assigned = False
 
-        self.timeout_nodes.append(node_id)
+            self.timeout_nodes.append(node_id)
 
-        # Node is no longer active.
-        del self.active_nodes[node_id]
+            # Node is no longer active.
+            del self.active_nodes[node_id]
 
     @override
     async def ps_get_new_data(self, node_id: PSNodeId) -> Optional[int]:
@@ -191,16 +192,47 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
         logger.info("Start test case test_heartbeat_error")
 
-        #server = TestServer(config)
-        #node1 = TestNode(config)
-        #node2 = TestNode(config)
+        server = TestServer(config)
+        node1 = TestNode(config)
+        node2 = TestNode(config)
 
-        # TODO: Finish test case.
+        async with asyncio.TaskGroup() as tg:
+            server_task = tg.create_task(server.ps_main_loop())
+            server_task.set_name("ServerTask")
+
+            # Give the server some time to start up.
+            await asyncio.sleep(2.0)
+
+            node_task1 = tg.create_task(node1.ps_start_tasks())
+            node_task1.set_name("NodeTask1")
+
+            await asyncio.sleep(1.0)
+
+            node_task2 = tg.create_task(node2.ps_start_tasks())
+            node_task2.set_name("NodeTask2")
+
+            await asyncio.sleep(2.0)
+
+            # Now simulate a broken node:
+            node_task2.cancel()
+
+        self.assertEqual(node1.init_data, 10)
+        self.assertEqual(node2.init_data, 10)
+
+        self.assertEqual(len(server.timeout_nodes), 1)
+        self.assertTrue(node2.node_id in server.timeout_nodes)
+        self.assertEqual(server.quit_counter, 0)
+
+        for jd in server.job_data:
+            self.assertTrue(jd.assigned)
+            self.assertEqual(jd.value, server.max_value)
 
 
 if __name__ == "__main__":
     log_file_name: str = "communication.log"
-    logging.basicConfig(filename=log_file_name, level=logging.DEBUG)
+    log_format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+    logging.basicConfig(filename=log_file_name, level=logging.DEBUG, format=log_format)
+    logging.getLogger("asyncio").setLevel(logging.WARNING)
 
     try:
         unittest.main()
