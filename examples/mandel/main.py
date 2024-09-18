@@ -2,6 +2,9 @@
 import argparse
 import logging
 import pathlib
+import array
+from enum import Enum
+
 from typing import Optional, override
 
 from parasnake.ps_config import PSConfiguration
@@ -24,13 +27,18 @@ class MandelInfo:
         self.im_step: float = (c_end.imag - c_start.imag) / float(height)
         self.limit: int = limit
 
+class RowStatus(Enum):
+    Empty = 0
+    Pending = 1
+    Done = 2
+
+
 class MandelNode(PSNode):
     def __init__(self, config: PSConfiguration):
         super().__init__(config)
 
     @override
     def ps_init(self, data: MandelInfo):
-        # TODO: implement
         self.mandel_info: MandelInfo = data
 
     @override
@@ -42,16 +50,25 @@ class MandelServer(PSServer):
     def __init__(self, config: PSConfiguration, mandel_info: MandelInfo):
         super().__init__(config)
         self.mandel_info: MandelInfo = mandel_info
+        self.node_id_row = {}
+
+        size = mandel_info.width * mandel_info.height
+        elems = (0.0 for _ in range(size))
+        self.mandel_image = array.array('d', elems)
+
+        self.processed_rows = [RowStatus.Empty for _ in range(mandel_info.height)]
 
     @override
     def ps_get_init_data(self, node_id: PSNodeId) -> MandelInfo:
-        # TODO: implement
-        return MandelInfo()
+        return self.mandel_info
 
     @override
     def ps_is_job_done(self) -> bool:
-        # TODO: implement
-        return False
+        for status in self.processed_rows:
+            if not RowStatus.Done:
+                return False
+
+        return True
 
     @override
     def ps_save_data(self) -> None:
@@ -60,14 +77,32 @@ class MandelServer(PSServer):
 
     @override
     def ps_node_timeout(self, node_id: PSNodeId) -> None:
-        # TODO: implement
-        pass
+        if node_id in self.node_id_row:
+            row = self.node_id_row[node_id]
+            self.processed_rows[row] = RowStatus.Empty
+            del self.node_id_row[node_id]
 
     @override
     def ps_get_new_data(self, node_id: PSNodeId) -> Optional[int]:
-        # TODO: implement
-        pass
+        for i, status in enumerate(self.processed_rows):
+            if status == RowStatus.Empty:
+                self.node_id_row[node_id] = i
+                self.processed_rows[i] = RowStatus.Pending
+                return i
+
+        return None
  
+    @override
+    def ps_process_result(self, node_id: PSNodeId, result: array.array):
+        row: int = self.node_id_row[node_id]
+        offset: int = (row * self.mandel_info.width)
+
+        for x in range(self.mandel_info.width):
+            self.mandel_image[offset + x] = result[x]
+
+        del self.node_id_row[node_id]
+        self.processed_rows[row] = RowStatus.Done
+
 def run_server(config: PSConfiguration):
     mandel_info = MandelInfo()
     server = MandelServer(config, mandel_info)
