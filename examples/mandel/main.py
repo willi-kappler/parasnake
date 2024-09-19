@@ -18,14 +18,15 @@ logger = logging.getLogger(__name__)
 
 class MandelInfo:
     def __init__(self, c_start: complex = -2.0-1.5j, c_end: complex = 1.0+1.5j,
-            width: int = 1024, height: int = 1024, limit: int = 2048):
+            width: int = 1024, height: int = 1024, max_iteration: int = 2048):
         self.c_start: complex = c_start
         self.c_end: complex = c_end
         self.width: int = width
         self.height: int = height
         self.re_step: float = (c_end.real - c_start.real) / float(width)
         self.im_step: float = (c_end.imag - c_start.imag) / float(height)
-        self.limit: int = limit
+        self.max_iteration: int = max_iteration
+
 
 class RowStatus(Enum):
     Empty = 0
@@ -42,9 +43,30 @@ class MandelNode(PSNode):
         self.mandel_info: MandelInfo = data
 
     @override
-    def ps_process_data(self, data: int) -> None:
-        # TODO: implement
-        return None
+    def ps_process_data(self, data: int) -> array.array:
+        width: int = self.mandel_info.width
+        elems = (0 for _ in range(width))
+        line = array.array("L", elems)
+
+        step_x: float = self.mandel_info.re_step
+        step_y: float = self.mandel_info.im_step
+        c_start: complex = self.mandel_info.c_start
+        c_y: float = c_start.imag + (step_y * data)
+
+        for x in range(width):
+            c_x: float = c_start.real + (step_x * x)
+            c = complex(c_x, c_y)
+            z = c
+            iter = 0
+
+            while (abs(z) < 2.0) and (iter < self.mandel_info.max_iteration):
+                z = c + (z * z)
+                iter += 1
+
+            line[x] = iter
+
+        return line
+
 
 class MandelServer(PSServer):
     def __init__(self, config: PSConfiguration, mandel_info: MandelInfo):
@@ -53,8 +75,8 @@ class MandelServer(PSServer):
         self.node_id_row = {}
 
         size = mandel_info.width * mandel_info.height
-        elems = (0.0 for _ in range(size))
-        self.mandel_image = array.array('d', elems)
+        elems = (0 for _ in range(size))
+        self.mandel_image = array.array("L", elems)
 
         self.processed_rows = [RowStatus.Empty for _ in range(mandel_info.height)]
 
@@ -72,8 +94,30 @@ class MandelServer(PSServer):
 
     @override
     def ps_save_data(self) -> None:
-        # TODO: implement
-        pass
+        width: int = self.mandel_info.width
+        height: int = self.mandel_info.height
+
+        limit = self.mandel_info.max_iteration
+        half_limit: int = int(limit / 2)
+
+        with open("mandel_image.ppm", "w") as f:
+            f.write("P3\n")
+            f.write(f"{width} {height}\n")
+            f.write("255\n")
+
+            for y in range(height):
+                for x in range(width):
+                    val: int = self.mandel_image[(y * width) + x]
+
+                    if val == self.mandel_info.max_iteration:
+                        f.write("0 0 0 ")
+                    else:
+                        if val <= half_limit:
+                            color_value = int((val * 255) / half_limit)
+                            f.write(f"255 0 {color_value}")
+                        else:
+                            color_value = int(((limit - val) * 255) / half_limit)
+                            f.write(f"{color_value} 0 255")
 
     @override
     def ps_node_timeout(self, node_id: PSNodeId) -> None:
@@ -102,6 +146,7 @@ class MandelServer(PSServer):
 
         del self.node_id_row[node_id]
         self.processed_rows[row] = RowStatus.Done
+
 
 def run_server(config: PSConfiguration):
     mandel_info = MandelInfo()
