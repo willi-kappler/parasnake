@@ -34,7 +34,7 @@ class PSServer:
         self.lock: threading.Lock = threading.Lock()
 
     def ps_run(self) -> None:
-        logger.info("Starting server with port: {self.server_port}.")
+        logger.info(f"Starting server with port: {self.server_port}.")
         logger.debug(f"Heartbeat timeout: {self.heartbeat_timeout}.")
 
         asyncio.run(self.ps_main_loop())
