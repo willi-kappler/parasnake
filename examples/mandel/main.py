@@ -109,15 +109,16 @@ class MandelServer(PSServer):
                 for x in range(width):
                     val: int = self.mandel_image[(y * width) + x]
 
-                    if val == self.mandel_info.max_iteration:
-                        f.write("0 0 0 ")
-                    else:
+                    if val < self.mandel_info.max_iteration:
                         if val <= half_limit:
                             color_value = int((val * 255) / half_limit)
-                            f.write(f"255 0 {color_value}")
+                            f.write(f"255 0 {color_value} ")
                         else:
                             color_value = int(((limit - val) * 255) / half_limit)
-                            f.write(f"{color_value} 0 255")
+                            f.write(f"{color_value} 0 255 ")
+                    else:
+                        f.write("0 0 0 ")
+                f.write("\n")
 
     @override
     def ps_node_timeout(self, node_id: PSNodeId) -> None:
