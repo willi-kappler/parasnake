@@ -1,12 +1,13 @@
 
 TODO:
 
-- add mandel example.
 - add other examples.
 - store error message in node and log it on exit if not empty.
 - store error message in server and log it on exit if not empty.
 - add more configuration options.
 - use enums for message types.
+- add more code documentation.
+
 
 
 
@@ -21,6 +22,7 @@ DONE:
 # use threading for client (node): asyncio.to_thread()
 # Use threading in server to handle client methods (get new data, handle result).
   # Or asyncio.to_thread() ? https://superfastpython.com/asyncio-to_thread/
+# add mandel example.
 
 
 
