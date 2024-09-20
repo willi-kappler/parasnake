@@ -6,6 +6,7 @@ TODO:
 - store error message in node and log it on exit if not empty.
 - store error message in server and log it on exit if not empty.
 - add more configuration options.
+- use enums for message types.
 
 
 
