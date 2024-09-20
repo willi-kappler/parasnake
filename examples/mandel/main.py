@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class MandelInfo:
     def __init__(self, c_start: complex = -2.0-1.5j, c_end: complex = 1.0+1.5j,
-            width: int = 1024, height: int = 1024, max_iteration: int = 2048):
+            width: int = 2048, height: int = 2048, max_iteration: int = 2048):
         self.c_start: complex = c_start
         self.c_end: complex = c_end
         self.width: int = width
@@ -87,7 +87,7 @@ class MandelServer(PSServer):
     @override
     def ps_is_job_done(self) -> bool:
         for status in self.processed_rows:
-            if not RowStatus.Done:
+            if status != RowStatus.Done:
                 return False
 
         return True
@@ -108,14 +108,9 @@ class MandelServer(PSServer):
             for y in range(height):
                 for x in range(width):
                     val: int = self.mandel_image[(y * width) + x]
-
                     if val < self.mandel_info.max_iteration:
-                        if val <= half_limit:
-                            color_value = int((val * 255) / half_limit)
-                            f.write(f"255 0 {color_value} ")
-                        else:
-                            color_value = int(((limit - val) * 255) / half_limit)
-                            f.write(f"{color_value} 0 255 ")
+                        color_value = (val % 16) * 16
+                        f.write(f"255 {color_value} 0 ")
                     else:
                         f.write("0 0 0 ")
                 f.write("\n")
@@ -145,7 +140,6 @@ class MandelServer(PSServer):
         for x in range(self.mandel_info.width):
             self.mandel_image[offset + x] = result[x]
 
-        del self.node_id_row[node_id]
         self.processed_rows[row] = RowStatus.Done
 
 
