@@ -72,7 +72,7 @@ class MandelServer(PSServer):
     def __init__(self, config: PSConfiguration, mandel_info: MandelInfo):
         super().__init__(config)
         self.mandel_info: MandelInfo = mandel_info
-        self.node_id_row = {}
+        self.node_id_row: dict[PSNodeId, int] = {}
 
         size = mandel_info.width * mandel_info.height
         elems = (0 for _ in range(size))
@@ -96,9 +96,6 @@ class MandelServer(PSServer):
     def ps_save_data(self) -> None:
         width: int = self.mandel_info.width
         height: int = self.mandel_info.height
-
-        limit = self.mandel_info.max_iteration
-        half_limit: int = int(limit / 2)
 
         with open("mandel_image.ppm", "w") as f:
             f.write("P3\n")
@@ -131,7 +128,7 @@ class MandelServer(PSServer):
                 return i
 
         return None
- 
+
     @override
     def ps_process_result(self, node_id: PSNodeId, result: array.array):
         row: int = self.node_id_row[node_id]
@@ -148,9 +145,11 @@ def run_server(config: PSConfiguration):
     server = MandelServer(config, mandel_info)
     server.ps_run()
 
+
 def run_client(config: PSConfiguration):
     node = MandelNode(config)
     node.ps_run()
+
 
 def main():
     config = PSConfiguration.from_json("mandel_config.json")
@@ -181,6 +180,7 @@ def main():
         run_server(config)
     else:
         run_client(config)
+
 
 if __name__ == "__main__":
     main()

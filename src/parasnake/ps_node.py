@@ -64,7 +64,6 @@ class PSNode:
             logger.error("Could not connect to server. Will exit now.")
             return psm.PS_CONNECTION_ERROR
 
-
     async def ps_main_loop(self) -> None:
         logger.debug("Start main task.")
         need_more_data_message = psm.ps_gen_need_more_data_message(self.node_id, self.secret_key)

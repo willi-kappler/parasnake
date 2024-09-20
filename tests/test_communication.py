@@ -9,9 +9,6 @@ import logging
 import pathlib
 import time
 from typing import Optional, override
-#from time import sleep
-# import copy
-# import uuid
 
 from parasnake.ps_nodeid import PSNodeId
 from parasnake.ps_node import PSNode
@@ -25,6 +22,7 @@ class WorkData:
     def __init__(self):
         self.value: int = 0
         self.assigned: bool = False
+
 
 class TestNode(PSNode):
     def __init__(self, configuration: PSConfiguration):
@@ -173,7 +171,6 @@ class TestCommunication(unittest.IsolatedAsyncioTestCase):
 
             node_task2 = tg.create_task(node2.ps_start_tasks())
             node_task2.set_name("NodeTask2")
-
 
         self.assertEqual(node1.init_data, 10)
         self.assertEqual(node2.init_data, 10)
