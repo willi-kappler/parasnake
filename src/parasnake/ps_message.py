@@ -10,6 +10,7 @@ This module defines all the messages and how to decode and encode them.
 
 # Python std modules:
 from typing import Any
+from enum import Enum
 import pickle
 import lzma
 
@@ -20,18 +21,19 @@ from cryptography.fernet import Fernet
 from parasnake.ps_nodeid import PSNodeId
 
 
-PS_HEARTBEAT_MESSAGE = "heartbeat_from_node"
-PS_HEARTBEAT_OK = "heartbeat_ok"
-PS_HEARTBEAT_ERROR = "heartbeat_error"
-PS_QUIT = "quit"
-PS_INIT_MESSAGE = "init_from_node"
-PS_INIT_OK = "init_ok"
-PS_INIT_ERROR = "init_error"
-PS_NEW_DATA_FROM_SERVER = "new_data_from_server"
-PS_NEW_RESULT_FROM_NODE = "new_result_from_node"
-PS_RESULT_OK = "result_ok"
-PS_NODE_NEEDS_MORE_DATA = "node_needs_more_data"
-PS_CONNECTION_ERROR = "connection_error"
+class PSMessageType(Enum):
+    Heartbeat = 0
+    HeartbeatOK = 1
+    HeartbeatError = 2
+    Init = 3
+    InitOK = 4
+    InitError = 5
+    NewDataFromServer = 6
+    NewResultFromNode = 7
+    NodeNeedsMoreData = 8
+    ResultOK = 9
+    ConnectionError = 10
+    Quit = 11
 
 
 def encode_message(message: Any, secret_key: bytes) -> bytes:
@@ -55,57 +57,57 @@ def decode_message(message: bytes, secret_key: bytes) -> Any:
 
 
 def ps_gen_heartbeat_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
-    msg = (PS_HEARTBEAT_MESSAGE, node_id)
+    msg = (PSMessageType.Heartbeat, node_id)
     return encode_message(msg, secret_key)
 
 
 def ps_gen_heartbeat_message_ok(secret_key: bytes) -> bytes:
-    msg = PS_HEARTBEAT_OK
+    msg = PSMessageType.HeartbeatOK
     return encode_message(msg, secret_key)
 
 
 def ps_gen_heartbeat_message_error(secret_key: bytes) -> bytes:
-    msg = PS_HEARTBEAT_ERROR
+    msg = PSMessageType.HeartbeatError
     return encode_message(msg, secret_key)
 
 
 def ps_gen_init_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
-    msg = (PS_INIT_MESSAGE, node_id)
+    msg = (PSMessageType.Init, node_id)
     return encode_message(msg, secret_key)
 
 
 def ps_gen_init_message_ok(init_data: Any, secret_key: bytes) -> bytes:
-    msg = (PS_INIT_OK, init_data)
+    msg = (PSMessageType.InitOK, init_data)
     return encode_message(msg, secret_key)
 
 
 def ps_gen_init_message_error(secret_key: bytes) -> bytes:
-    msg = PS_INIT_ERROR
+    msg = PSMessageType.InitError
     return encode_message(msg, secret_key)
 
 
 def ps_gen_result_message(node_id: PSNodeId, secret_key: bytes, new_data: Any) -> bytes:
-    msg = (PS_NEW_RESULT_FROM_NODE, node_id, new_data)
+    msg = (PSMessageType.NewResultFromNode, node_id, new_data)
     return encode_message(msg, secret_key)
 
 
 def ps_gen_need_more_data_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
-    msg = (PS_NODE_NEEDS_MORE_DATA, node_id)
+    msg = (PSMessageType.NodeNeedsMoreData, node_id)
     return encode_message(msg, secret_key)
 
 
 def ps_gen_new_data_message(new_data: Any, secret_key: bytes) -> bytes:
-    msg = (PS_NEW_DATA_FROM_SERVER, new_data)
+    msg = (PSMessageType.NewDataFromServer, new_data)
     return encode_message(msg, secret_key)
 
 
 def ps_gen_result_ok_message(secret_key: bytes) -> bytes:
-    msg = PS_RESULT_OK
+    msg = PSMessageType.ResultOK
     return encode_message(msg, secret_key)
 
 
 def ps_gen_quit_message(secret_key: bytes) -> bytes:
-    msg = PS_QUIT
+    msg = PSMessageType.Quit
     return encode_message(msg, secret_key)
 
 

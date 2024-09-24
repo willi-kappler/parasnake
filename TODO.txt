@@ -5,8 +5,10 @@ TODO:
 - store error message in node and log it on exit if not empty.
 - store error message in server and log it on exit if not empty.
 - add more configuration options.
-- use enums for message types.
 - add more code documentation.
+- add support for multiple servers.
+- add web interface ?
+
 
 
 
@@ -23,6 +25,7 @@ DONE:
 # Use threading in server to handle client methods (get new data, handle result).
   # Or asyncio.to_thread() ? https://superfastpython.com/asyncio-to_thread/
 # add mandel example.
+# use enums for message types.
 
 
 

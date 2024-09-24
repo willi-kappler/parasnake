@@ -69,7 +69,7 @@ class PSServer:
             await self.ps_write_msg(writer, psm.ps_gen_quit_message(self.secret_key))
         else:
             match msg:
-                case (psm.PS_INIT_MESSAGE, node_id):
+                case (psm.PSMessageType.Init, node_id):
                     logger.debug("Init message.")
                     if node_id in self.all_nodes:
                         logger.error("Node id already registered: {node_id}")
@@ -78,7 +78,7 @@ class PSServer:
                         self.ps_register_new_node(node_id)
                         init_data = await self.ps_get_init_data_thread(node_id)
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_ok(init_data, self.secret_key))
-                case (psm.PS_HEARTBEAT_MESSAGE, node_id):
+                case (psm.PSMessageType.Heartbeat, node_id):
                     logger.debug("Heartbeat message.")
                     if node_id in self.all_nodes:
                         self.ps_update_node_time(node_id)
@@ -86,7 +86,7 @@ class PSServer:
                     else:
                         logger.error("Node id not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_heartbeat_message_error(self.secret_key))
-                case (psm.PS_NODE_NEEDS_MORE_DATA, node_id):
+                case (psm.PSMessageType.NodeNeedsMoreData, node_id):
                     logger.debug("Node needs more data.")
                     if node_id in self.all_nodes:
                         self.ps_update_node_time(node_id)
@@ -95,7 +95,7 @@ class PSServer:
                     else:
                         logger.error("Node id not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
-                case (psm.PS_NEW_RESULT_FROM_NODE, node_id, result):
+                case (psm.PSMessageType.NewResultFromNode, node_id, result):
                     logger.debug("New result from node.")
                     if node_id in self.all_nodes:
                         self.ps_update_node_time(node_id)

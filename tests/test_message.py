@@ -42,7 +42,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_heartbeat_message(id, key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, (psm.PS_HEARTBEAT_MESSAGE, id))
+        self.assertEqual(msg2, (psm.PSMessageType.Heartbeat, id))
 
     def test_heartbeat_message_ok(self):
         key = self.gen_key()
@@ -50,7 +50,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_heartbeat_message_ok(key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, psm.PS_HEARTBEAT_OK)
+        self.assertEqual(msg2, psm.PSMessageType.HeartbeatOK)
 
     def test_heartbeat_message_error(self):
         key = self.gen_key()
@@ -58,7 +58,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_heartbeat_message_error(key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, psm.PS_HEARTBEAT_ERROR)
+        self.assertEqual(msg2, psm.PSMessageType.HeartbeatError)
 
     def test_init_message(self):
         id = PSNodeId()
@@ -67,7 +67,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_init_message(id, key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, (psm.PS_INIT_MESSAGE, id))
+        self.assertEqual(msg2, (psm.PSMessageType.Init, id))
 
     def test_init_message_ok(self):
         key = self.gen_key()
@@ -76,7 +76,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_init_message_ok(data, key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, (psm.PS_INIT_OK, data))
+        self.assertEqual(msg2, (psm.PSMessageType.InitOK, data))
 
     def test_init_message_error(self):
         key = self.gen_key()
@@ -84,7 +84,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_init_message_error(key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, psm.PS_INIT_ERROR)
+        self.assertEqual(msg2, psm.PSMessageType.InitError)
 
     def test_result_message(self):
         id = PSNodeId()
@@ -94,7 +94,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_result_message(id, key, data)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, (psm.PS_NEW_RESULT_FROM_NODE, id, data))
+        self.assertEqual(msg2, (psm.PSMessageType.NewResultFromNode, id, data))
 
     def test_need_data_message(self):
         id = PSNodeId()
@@ -103,7 +103,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_need_more_data_message(id, key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, (psm.PS_NODE_NEEDS_MORE_DATA, id))
+        self.assertEqual(msg2, (psm.PSMessageType.NodeNeedsMoreData, id))
 
     def test_new_data_message(self):
         key = self.gen_key()
@@ -112,7 +112,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_new_data_message(data, key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, (psm.PS_NEW_DATA_FROM_SERVER, data))
+        self.assertEqual(msg2, (psm.PSMessageType.NewDataFromServer, data))
 
     def test_result_ok_message(self):
         key = self.gen_key()
@@ -120,7 +120,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_result_ok_message(key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, psm.PS_RESULT_OK)
+        self.assertEqual(msg2, psm.PSMessageType.ResultOK)
 
     def test_quit_message(self):
         key = self.gen_key()
@@ -128,7 +128,7 @@ class TestMessage(unittest.TestCase):
         msg1 = psm.ps_gen_quit_message(key)
         msg2 = psm.decode_message(msg1, key)
 
-        self.assertEqual(msg2, psm.PS_QUIT)
+        self.assertEqual(msg2, psm.PSMessageType.Quit)
 
 
 if __name__ == "__main__":

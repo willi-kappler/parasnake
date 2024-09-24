@@ -62,7 +62,7 @@ class PSNode:
             return msg
         except ConnectionRefusedError:
             logger.error("Could not connect to server. Will exit now.")
-            return psm.PS_CONNECTION_ERROR
+            return psm.PSMessageType.ConnectionError
 
     async def ps_main_loop(self) -> None:
         logger.debug("Start main task.")
@@ -84,7 +84,7 @@ class PSNode:
                     msg = await self.ps_send_msg_return_answer(result_msg)
 
             match msg:
-                case (psm.PS_INIT_OK, data):
+                case (psm.PSMessageType.InitOK, data):
                     if mode == "init":
                         logger.debug("Init node OK.")
                         self.ps_init(data)
@@ -92,10 +92,10 @@ class PSNode:
                     else:
                         logger.error("Mode should be init: {mode}.")
                         break
-                case psm.PS_INIT_ERROR:
+                case psm.PSMessageType.InitError:
                     logger.error("Init node failed!")
                     break
-                case (psm.PS_NEW_DATA_FROM_SERVER, new_data):
+                case (psm.PSMessageType.NewDataFromServer, new_data):
                     if mode == "need_data":
                         logger.debug("Received new data from server.")
                         match new_data:
@@ -110,17 +110,17 @@ class PSNode:
                     else:
                         logger.error("Mode should be need_data: {mode}.")
                         break
-                case psm.PS_RESULT_OK:
+                case psm.PSMessageType.ResultOK:
                     if mode == "has_data":
                         logger.debug("New processed data has been sent to server.")
                         mode = "need_data"
                     else:
                         logger.error("Mode should be has_data: {mode}")
                         break
-                case psm.PS_QUIT:
+                case psm.PSMessageType.Quit:
                     logger.debug("Job finished.")
                     break
-                case psm.PS_CONNECTION_ERROR:
+                case psm.PSMessageType.ConnectionError:
                     logger.error("Connection error, will exit now.")
                     break
                 case _:
@@ -138,12 +138,12 @@ class PSNode:
             msg = await self.ps_send_msg_return_answer(heartbeat_message)
 
             match msg:
-                case psm.PS_HEARTBEAT_OK:
+                case psm.PSMessageType.HeartbeatOK:
                     logger.debug("Heartbeat OK.")
-                case psm.PS_HEARTBEAT_ERROR:
+                case psm.PSMessageType.HeartbeatError:
                     logger.debug("Heartbeat Error!")
                     break
-                case psm.PS_QUIT:
+                case psm.PSMessageType.Quit:
                     logger.debug("Job finished, quit.")
                     break
                 case _:
