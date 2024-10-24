@@ -4,7 +4,11 @@
 # See: https://github.com/willi-kappler/parasnake
 
 """
-This module defines the unique nodeid that is assigned to each node.
+This module defines the unique node id that is assigned to each node.
+When a new node registers for the first time to the server the node's own
+node id is send to the server. Each message from the node to the server
+contains this unique node id. If the node id is unknown to the server,
+it sends an error to the node.
 """
 
 
