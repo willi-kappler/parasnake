@@ -9,8 +9,9 @@ This module defines the configuration for the server and the node.
 
 import json
 import base64
-
 import logging
+from typing import Any
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,11 +27,12 @@ class PSConfiguration:
         self.quit_counter: int = 10
 
     @staticmethod
-    def from_json(file_name):
+    def from_json(file_name) -> Any:
         """
         Load the configuration (JSON format) from the given file name.
 
         :param file_name: File name of the configuration.
+        :return: A valid configuration from the given JSON file.
         """
 
         logger.debug(f"Load configuration from file: {file_name}.")
