@@ -34,6 +34,11 @@ class PSServer:
         self.lock: threading.Lock = threading.Lock()
 
     def ps_run(self) -> None:
+        """
+        This methods uses asyncio.run to call the main loop (ps_main_loop).
+        It is the main entry point for the user code.
+        """
+
         logger.info(f"Starting server with port: {self.server_port}.")
         logger.debug(f"Heartbeat timeout: {self.heartbeat_timeout}.")
 
@@ -44,21 +49,39 @@ class PSServer:
         logger.info("Will exit server now.")
 
     def ps_register_new_node(self, node_id: PSNodeId) -> None:
+        """
+        This method registers a new node with the given node id.
+        It also sets the heartbeat time to the current time.
+        """
+
         logger.debug("Register new node.")
         now: float = time.time()
         self.all_nodes[node_id] = now
 
     def ps_update_node_time(self, node_id: PSNodeId) -> None:
+        """
+        This methods updates the heartbeat time for the given node.
+        """
+
         logger.debug("Update node time.")
         now: float = time.time()
         self.all_nodes[node_id] = now
 
     async def ps_write_msg(self, writer, msg) -> None:
+        """
+        This is a helper method to send a message over the network and await for it to finish.
+        """
+
         writer.write(msg)
         writer.write_eof()
         await writer.drain()
 
     async def ps_handle_node(self, reader, writer) -> None:
+        """
+        This method handles all the node communication.
+        It is called from ps_main_loop() when a node connects to the server.
+        """
+
         logger.debug("Connection from node.")
 
         data = await reader.read()
@@ -109,6 +132,12 @@ class PSServer:
         await writer.wait_closed()
 
     async def ps_main_loop(self) -> None:
+        """
+        This method is the main loop and starts the server.
+        It is called from ps_run().
+        If a node connects the message is processed in the ps_handle_node() method.
+        """
+
         logger.debug("Start main server task.")
         start_time = datetime.datetime.now()
         logger.info(f"Starting now: {start_time}")
@@ -149,6 +178,12 @@ class PSServer:
         logger.info(f"Time taken: in hours: {in_hours}")
 
     def ps_check_heartbeat(self) -> None:
+        """
+        This method checks the heartbeat values for all the active nodes.
+        If one node failed to send the heartbeat message, the ps_node_timeout()
+        method is called with the corresponding nodeid.
+        """
+
         logger.debug("Check heartbeat of all nodes.")
 
         now: float = time.time()
