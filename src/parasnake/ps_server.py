@@ -53,6 +53,7 @@ class PSServer:
         """
         This method registers a new node with the given node id.
         It also sets the heartbeat time to the current time.
+        It's called from the ps_handle_node method.
 
         :param node_id: The node id of the new node.
         """
@@ -64,6 +65,7 @@ class PSServer:
     def ps_update_node_time(self, node_id: PSNodeId) -> None:
         """
         This methods updates the heartbeat time for the given node.
+        It's called from the ps_handle_node method.
 
         :param node_id: The node id of the node whose heartbeat time should be updated.
         """
@@ -75,6 +77,7 @@ class PSServer:
     async def ps_write_msg(self, writer, msg) -> None:
         """
         This is a helper method to send a message over the network and await for it to finish.
+        It's called from the ps_handle_node method.
 
         :param writer: The network socket to write (send) the message to.
         :param msg: The message to write (send).
@@ -89,6 +92,17 @@ class PSServer:
         This method handles all the node communication.
         It is called from ps_main_loop() when a node connects to the server.
         TODO: Describe the message types.
+
+        The nodes can send the following messages:
+
+        PSMessageType.Init: The node registeres with it's unique node id.
+            If the node id is already taken the server logs an error and sends
+            the InitError message to the node.
+            The method ps_register_new_node is called.
+            The method ps_get_init_data is called and the result is sent back to
+            the node with the InitOK message.
+
+        PSMessageType.Heartbeat: 
 
 
         :param reader: The network socket to read (receive) the node message from.
