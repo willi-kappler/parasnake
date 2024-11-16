@@ -53,7 +53,7 @@ class PSServer:
         """
         This method registers a new node with the given node id.
         It also sets the heartbeat time to the current time.
-        It's called from the ps_handle_node method.
+        It's called from the ps_handle_node() method.
 
         :param node_id: The node id of the new node.
         """
@@ -65,7 +65,7 @@ class PSServer:
     def ps_update_node_time(self, node_id: PSNodeId) -> None:
         """
         This methods updates the heartbeat time for the given node.
-        It's called from the ps_handle_node method.
+        It's called from the ps_handle_node() method.
 
         :param node_id: The node id of the node whose heartbeat time should be updated.
         """
@@ -77,7 +77,7 @@ class PSServer:
     async def ps_write_msg(self, writer, msg) -> None:
         """
         This is a helper method to send a message over the network and await for it to finish.
-        It's called from the ps_handle_node method.
+        It's called from the ps_handle_node() method.
 
         :param writer: The network socket to write (send) the message to.
         :param msg: The message to write (send).
@@ -90,7 +90,7 @@ class PSServer:
     async def ps_handle_node(self, reader, writer) -> None:
         """
         This method handles all the node communication.
-        It is called from ps_main_loop() when a node connects to the server.
+        It's called from ps_main_loop() when a node connects to the server.
         TODO: Describe the message types.
 
         The nodes can send the following messages:
@@ -102,8 +102,22 @@ class PSServer:
             The method ps_get_init_data is called and the result is sent back to
             the node with the InitOK message.
 
-        PSMessageType.Heartbeat: 
+        PSMessageType.Heartbeat: Each node has to send a heartbeat message to the server once it has
+            resistered itself via the Init message. The intervall is set in the configuration file
+            with the "heartbeat_timeout" option. This is checked in the ps_check_heartbeat() method.
+            If a node misses the heartbeat then the method ps_node_timeout() is called. Here the
+            user can decide what to do with the unprocessed data. Usually it is marked as "unprocessed"
+            and given to another node to process.
 
+        PSMessageType.NodeNeedsMoreData: After sending the processed data to the server, the node sends
+            this message in order to receive new data to process. If the job is done and no more data
+            is left, then the server returns None.
+            The methos ps_get_new_data() is called to get the new data and has to be implemented by the user.
+
+        PSMessageType.NewResultFromNode: This message is send when the node is done processing the data
+            it got from the server. The method ps_process_result() is called with the newly processed
+            data. This method has to be implemented by the user. Normally the data is merged back into
+            some data structure.
 
         :param reader: The network socket to read (receive) the node message from.
         :param writer: The network socket to write (send) the answer to.
@@ -161,7 +175,7 @@ class PSServer:
     async def ps_main_loop(self) -> None:
         """
         This method is the main loop and starts the server.
-        It is called from ps_run().
+        It's called from ps_run().
         If a node connects the message is processed in the ps_handle_node() method.
         """
 
@@ -209,6 +223,7 @@ class PSServer:
         This method checks the heartbeat values for all the active nodes.
         If one node failed to send the heartbeat message, the ps_node_timeout()
         method is called with the corresponding nodeid.
+        This method is called from ps_main_loop().
         """
 
         logger.debug("Check heartbeat of all nodes.")
@@ -223,6 +238,7 @@ class PSServer:
         """
         This method starts a new background thread to retrieve the initial data
         for the given node. Since this call may block it is run in a separate thread.
+        This method is called from ps_handle_node() (Init message).
 
         :param node_id: The id of the node that receives the initialisation data.
         :return: The init data for the given node.
@@ -235,6 +251,7 @@ class PSServer:
         """
         This method locks the server data before retrieving the initial data.
         It may block and is called in a separate thread.
+        It's called from ps_get_init_data_thread() (Init message).
 
         :param node_id: The id of the node that receives the initialisation data.
         :return: The init data for the given node.
@@ -249,6 +266,7 @@ class PSServer:
         This method must be implemented by the user.
         It retrieves (calculates) the initial data for the given node.
         Since it may block it is called in a separate thread.
+        It's called from ps_get_init_data_lock() (Init message).
 
         :param node_id: The id of the node that receives the initialisation data.
         :return: The init data for the given node.
@@ -264,6 +282,8 @@ class PSServer:
         This data is sent over the network to the node to be processed by that node.
         Since this method may block it is run in a separate thread.
         If there is no more data to process (=job is done) this method returns None.
+        Otherwise it returns the new data to be processed by the node.
+        It's called from ps_handle_node() (NodeNeedsMoreData message).
 
         :param node_id: The id of the node that receives the new data.
         :return: The new data for the given node.
@@ -274,9 +294,10 @@ class PSServer:
 
     def ps_get_new_data_lock(self, node_id: PSNodeId) -> Optional[Any]:
         """
-        This method locks the server data before creating new date for the node.
+        This method locks the server data before creating new data for the node.
         It may block and is run in a separate thread.
         If there is no more data to process (=job is done) this method returns None.
+        It's called from ps_get_new_data_thread() (NodeNeedsMoreData message).
 
         :param node_id: The id of the node that receives the new data.
         :return: The new data for the given node.
@@ -291,6 +312,7 @@ class PSServer:
         This method processes the data (result) from the given node.
         Usually the server will merge the data with its internal data.
         Since this method may block it is run in a separate thread.
+        It's called from ps_handle_node() (NewResultFromNode message).
 
         :param node_id: The id of the node that has processed the data and sent
                         the results back to the server.
@@ -303,6 +325,7 @@ class PSServer:
         """
         This method locks the server data before processing the result from the node.
         It may block and is run in a separate thread.
+        It's called from ps_process_result_thread() (NewResultFromNode message).
 
         :param node_id: The id of the node that has processed the data and sent
                         the results back to the server.
@@ -319,6 +342,8 @@ class PSServer:
         processed.
         If the job is done it returns True and all the nodes are notyfied at their next
         connection to the server.
+        Otherwise it returns False.
+        It's called from ps_main_loop().
 
         :return: True if the job is finished, False otherwise.
         :rtype: Bool
@@ -328,18 +353,56 @@ class PSServer:
         return False
 
     def ps_save_data(self) -> None:
+        """
+        This method must be implemented by the user.
+        It's called from ps_run() and only when the job is done.
+        Here the use can decide what to save in which format and where.
+        """
+
         # Must be implemented by the user.
         pass
 
     def ps_node_timeout(self, node_id: PSNodeId) -> None:
-        # Must be implemented by the user.
+        """
+        This method can be implemented by the user. It is called from ps_check_heartbeat() and when a
+        node hasn't send the heartbeat message in time or at all.
+        The user can keep track of the nodes and mark the data as "not taken" so that other
+        nodes can process the data of this node. See the mandelbrot example on how this can be done.
+
+        :param node_id: The id of the node that has missed the heartbeat message.
+        """
+
+        # Can be implemented by the user.
         pass
 
     def ps_get_new_data(self, node_id: PSNodeId) -> Optional[Any]:
+        """
+        This method must be implemented by the user. It is called from
+        ps_get_new_data_lock() (NodeNeedsMoreData message).
+        It returns the new data that has to be processed by the given node (node_id).
+        If the job is done and no more data has to be processed then this method must
+        return None.
+
+        :param node_id: The id of the node that receives the new data.
+        :return: The new data for the given node.
+        :rtype: Optional[Any]
+        """
+
         # Must be implemented by the user.
         return None
 
     def ps_process_result(self, node_id: PSNodeId, result: Any):
+        """
+        This method must be implemented by the user. It is called from
+        ps_process_result_lock() (NewResultFromNode message).
+        The node sends the processed data to the server and the user has to handle
+        this processed result in this method. Usually it is merged in some data structure.
+
+        :param node_id: The id of the node that has processed the data and sent the results back to
+                        the server.
+        :param result: This is the processed data from the node.
+        """
+
         # Must be implemented by the user.
         pass
 
