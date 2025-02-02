@@ -5,6 +5,7 @@
       (python312.withPackages(ps: with ps; [
         cryptography
         flake8
+        hatchling
         ipython
         mypy
         ]))
