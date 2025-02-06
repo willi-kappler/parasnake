@@ -51,7 +51,7 @@ class PSServer:
 
     def ps_register_new_node(self, node_id: PSNodeId) -> None:
         """
-        This method registers a new node with the given node ID 
+        This method registers a new node with the given node ID
         and sets its heartbeat time to the current time.
 
         It's called from the ps_handle_node() method.
@@ -245,7 +245,7 @@ class PSServer:
 
     async def ps_get_init_data_thread(self, node_id: PSNodeId) -> Any:
         """
-        This method starts a new background thread to retrieve the initial data 
+        This method starts a new background thread to retrieve the initial data
         for the given node.
 
         Since this call may block, it is run in a separate thread.
@@ -340,7 +340,7 @@ class PSServer:
         It's called from ps_handle_node() (NewResultFromNode message).
 
         Args:
-            node_id: The id of the node that has processed the data and sent the 
+            node_id: The ID of the node that has processed the data and sent the
             results back to the server.
 
         Returns:
@@ -356,7 +356,7 @@ class PSServer:
         It's called from ps_process_result_thread() (NewResultFromNode message).
 
         Args:
-            node_id: The id of the node that has processed the data and sent the results 
+            node_id: The ID of the node that has processed the data and sent the results
             back to the server.
         Returns:
             The processed data from the node.

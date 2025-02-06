@@ -70,7 +70,6 @@ def encode_message(message: Any, secret_key: bytes) -> bytes:
         The encoded message.
     """
 
-
     f = Fernet(secret_key)
 
     msg_ser = pickle.dumps(message)

@@ -225,7 +225,6 @@ class PSNode:
             The result after processing, which will be sent back to the server.
         """
 
-
         return await asyncio.to_thread(self.ps_process_data, data)
 
     def ps_init(self, data: Any) -> None:
@@ -246,7 +245,8 @@ class PSNode:
         """
         This method is called from the main loop in a background thread to avoid blocking other async tasks.
 
-        The user has to implement it to process the new data from the server, and the result will be sent back to the server.
+        The user has to implement it to process the new data from the server, and the result will be
+        sent back to the server.
 
         Args:
             data: The new data from the server that will be processed by this node.
