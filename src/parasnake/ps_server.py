@@ -36,7 +36,8 @@ class PSServer:
 
     def ps_run(self) -> None:
         """
-        This methods uses asyncio.run to call the main loop (ps_main_loop).
+        This methods uses asyncio.run to call the main loop
+        ([ps_main_loop](ps_server.html#parasnake.ps_server.PSServer.ps_main_loop)).
         It is the main entry point for the user code.
         """
 
@@ -54,7 +55,7 @@ class PSServer:
         This method registers a new node with the given node ID
         and sets its heartbeat time to the current time.
 
-        It's called from the ps_handle_node() method.
+        It's called from the [ps_handle_node](ps_server.html#parasnake.ps_server.PSServer.ps_handle_node) method.
 
         Args:
             node_id: The node ID of the new node.
@@ -101,14 +102,14 @@ class PSServer:
 
         The nodes can send the following messages:
 
-        PSMessageType.Init: The node registers with its unique node ID.
+        **PSMessageType.Init**: The node registers with its unique node ID.
             If the node ID is already taken, the server logs an error and sends
             the InitError message to the node.
             The method ps_register_new_node is called.
             The method ps_get_init_data is called, and the result is sent back to
             the node with the InitOK message.
 
-        PSMessageType.Heartbeat: Each node must send a heartbeat message to the server
+        **PSMessageType.Heartbeat**: Each node must send a heartbeat message to the server
             after registering itself via the Init message. The interval is set in the
             configuration file with the "heartbeat_timeout" option. This is checked
             in the ps_check_heartbeat() method. If a node misses the heartbeat, then
@@ -116,13 +117,13 @@ class PSServer:
             do with the unprocessed data. Usually, it is marked as "unprocessed" and
             given to another node to process.
 
-        PSMessageType.NodeNeedsMoreData: After sending the processed data to the server,
+        **PSMessageType.NodeNeedsMoreData**: After sending the processed data to the server,
             the node sends this message to receive new data to process. If the job is
             done and no more data is left, then the server returns None.
             The method ps_get_new_data() is called to get the new data and has to be
             implemented by the user.
 
-        PSMessageType.NewResultFromNode: This message is sent when the node is done
+        **PSMessageType.NewResultFromNode**: This message is sent when the node is done
             processing the data it got from the server. The method ps_process_result()
             is called with the newly processed data. This method has to be implemented
             by the user. Normally, the data is merged back into some data structure.
