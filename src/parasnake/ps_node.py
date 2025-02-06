@@ -31,7 +31,8 @@ class PSNode:
         """
         Initializes the node using the given configuration.
 
-        :param configuration: The configuration for the node.
+        Args:
+            configuration: The configuration for the node.
         """
 
         self.server_address: str = configuration.server_address
@@ -68,13 +69,16 @@ class PSNode:
 
     async def ps_send_msg_return_answer(self, msg: bytes) -> Any:
         """
-        This async method send an encoded message to the server and awaits for
-        the server to respond. The message from the server is decoded and returned.
+        This async method sends an encoded message to the server and awaits the server's response.
+
+        The message from the server is decoded and returned.
         This async method is called from ps_main_loop().
 
-        :param msg: The already encoded message that is send to the server.
-        :return: The decoded message from the server.
-        :rtype: Any
+        Args:
+            msg: The already encoded message that is sent to the server.
+
+        Returns:
+            The decoded message from the server.
         """
 
         try:
@@ -103,10 +107,12 @@ class PSNode:
         It is called from ps_start_tasks().
 
         The main loop is driven by the mode state:
+
             - init: This is the first state and the node has to register itself to the server.
             - need_data: The node is in this state when it needs data from the server.
             - has_data: After processing all the data, the node has to send the result back to
               the server.
+
         """
 
         logger.debug("Start main task.")
@@ -206,39 +212,47 @@ class PSNode:
 
     async def ps_process_data_thread(self, data: Any) -> Any:
         """
-        This async method is called from the main loop in order to process the new
-        data that has been sent by the server to the node.
-        Since data processing can take a lot of time a new OS thread is started to
-        do the processing in the background so that no other async taks is blocked.
-        This calls the user defined ps_process_data() as a new thread.
+        This async method is called from the main loop to process new data sent by the server to the node.
 
-        :param data: The new data that has been sent from the server and needs to be
-            processed.
-        :return: The result after the processing, will be sent back to the server.
-        :rtype: Any
+        Since data processing can take a lot of time, a new OS thread is started to
+        do the processing in the background so that no other async task is blocked.
+        This calls the user-defined ps_process_data() as a new thread.
+
+        Args:
+            data: The new data that has been sent from the server and needs to be processed.
+
+        Returns:
+            The result after processing, which will be sent back to the server.
         """
+
 
         return await asyncio.to_thread(self.ps_process_data, data)
 
     def ps_init(self, data: Any) -> None:
         """
-        This method is called from the main loop after the node has registered for the first time
-        to the server. The server may send back some initialisazion data for the node.
-        This data can be processed here. The user does not have to implement this method,
+        This method is called from the main loop after the node has registered for the first time to the server.
+
+        The server may send back some initialization data for the node.
+        This data can be processed here. The user does not have to implement this method
         if the server has no init data.
+
+        Args:
+            data: The initialization data sent by the server (if any).
         """
 
         pass
 
     def ps_process_data(self, data: Any) -> Any:
         """
-        This method is called from the main loop in a background thread to avoid blocking
-        other async tasks. The user has to implement it in order to process the new data
-        from the server and the result will be sent back to the server.
+        This method is called from the main loop in a background thread to avoid blocking other async tasks.
 
-        :param data: The new data from the server that will be processed by this node.
-        :return: The processed data from this node. Will be sent back to the server.
-        :rtype: Any
+        The user has to implement it to process the new data from the server, and the result will be sent back to the server.
+
+        Args:
+            data: The new data from the server that will be processed by this node.
+
+        Returns:
+            The processed data from this node, which will be sent back to the server.
         """
 
         # Must be implemented by the user!
