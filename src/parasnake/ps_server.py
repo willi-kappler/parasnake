@@ -57,7 +57,7 @@ class PSServer:
 
         It's called from the [ps_handle_node](ps_server.html#parasnake.ps_server.PSServer.ps_handle_node) method.
 
-        :param node_id: The node id of the new node.
+        :param node_id: The node ID of the new node.
         """
 
         logger.debug("Register new node.")
@@ -70,7 +70,7 @@ class PSServer:
 
         It's called from the ps_handle_node() method.
 
-        :param node_id: The node id of the node whose heartbeat time should be updated.
+        :param node_id: The node ID of the node whose heartbeat time should be updated.
         """
 
         logger.debug("Update node time.")
@@ -142,7 +142,7 @@ class PSServer:
                 case (psm.PSMessageType.Init, node_id):
                     logger.debug("Init message.")
                     if node_id in self.all_nodes:
-                        logger.error("Node id already registered: {node_id}")
+                        logger.error("Node ID already registered: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
                     else:
                         self.ps_register_new_node(node_id)
@@ -154,7 +154,7 @@ class PSServer:
                         self.ps_update_node_time(node_id)
                         await self.ps_write_msg(writer, psm.ps_gen_heartbeat_message_ok(self.secret_key))
                     else:
-                        logger.error("Node id not registered yet: {node_id}")
+                        logger.error("Node ID not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_heartbeat_message_error(self.secret_key))
                 case (psm.PSMessageType.NodeNeedsMoreData, node_id):
                     logger.debug("Node needs more data.")
@@ -163,7 +163,7 @@ class PSServer:
                         new_data = await self.ps_get_new_data_thread(node_id)
                         await self.ps_write_msg(writer, psm.ps_gen_new_data_message(new_data, self.secret_key))
                     else:
-                        logger.error("Node id not registered yet: {node_id}")
+                        logger.error("Node ID not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
                 case (psm.PSMessageType.NewResultFromNode, node_id, result):
                     logger.debug("New result from node.")
@@ -172,7 +172,7 @@ class PSServer:
                         await self.ps_process_result_thread(node_id, result)
                         await self.ps_write_msg(writer, psm.ps_gen_result_ok_message(self.secret_key))
                     else:
-                        logger.error("Node id not registered yet: {node_id}")
+                        logger.error("Node ID not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
 
         writer.close()
@@ -248,7 +248,7 @@ class PSServer:
         Since this call may block, it is run in a separate thread.
         This method is called from ps_handle_node() (Init message).
 
-        :param node_id: The id of the node that receives the initialisation data.
+        :param node_id: The ID of the node that receives the initialisation data.
         :return: The init data for the given node.
         """
 
@@ -261,7 +261,7 @@ class PSServer:
         It may block and is called in a separate thread.
         It's called from ps_get_init_data_thread() (Init message).
 
-        :param node_id: The id of the node that receives the initialisation data.
+        :param node_id: The ID of the node that receives the initialisation data.
         :return: The init data for the given node.
         """
 
@@ -276,7 +276,7 @@ class PSServer:
         Since it may block, it is called in a separate thread.
         It's called from ps_get_init_data_lock() (Init message).
 
-        :param node_id: The id of the node that receives the initialisation data.
+        :param node_id: The ID of the node that receives the initialisation data.
         :return: The init data for the given node.
         """
 
@@ -293,7 +293,7 @@ class PSServer:
         Otherwise, it returns the new data to be processed by the node.
         It's called from ps_handle_node() (NodeNeedsMoreData message).
 
-        :param node_id: The id of the node that receives the new data.
+        :param node_id: The ID of the node that receives the new data.
         :return: The new data for the given node.
         """
 
@@ -307,7 +307,7 @@ class PSServer:
         If there is no more data to process (=job is done), this method returns None.
         It's called from ps_get_new_data_thread() (NodeNeedsMoreData message).
 
-        :param node_id: The id of the node that receives the new data.
+        :param node_id: The ID of the node that receives the new data.
         :return: The new data for the given node.
         """
 
@@ -321,7 +321,7 @@ class PSServer:
         Since this method may block it is run in a separate thread.
         It's called from ps_handle_node() (NewResultFromNode message).
 
-        :param node_id: The id of the node that has processed the data and sent
+        :param node_id: The ID of the node that has processed the data and sent
                         the results back to the server.
         """
 
@@ -333,7 +333,7 @@ class PSServer:
         It may block and is run in a separate thread.
         It's called from ps_process_result_thread() (NewResultFromNode message).
 
-        :param node_id: The id of the node that has processed the data and sent
+        :param node_id: The ID of the node that has processed the data and sent
                         the results back to the server.
         """
 
@@ -374,7 +374,7 @@ class PSServer:
         The user can keep track of the nodes and mark the data as "not taken" so that other
         nodes can process the data of this node. See the mandelbrot example on how this can be done.
 
-        :param node_id: The id of the node that has missed the heartbeat message.
+        :param node_id: The ID of the node that has missed the heartbeat message.
         """
 
         # Can be implemented by the user.
@@ -388,7 +388,7 @@ class PSServer:
         If the job is done and no more data has to be processed then this method must
         return None.
 
-        :param node_id: The id of the node that receives the new data.
+        :param node_id: The ID of the node that receives the new data.
         :return: The new data for the given node.
         :rtype: Optional[Any]
         """
@@ -403,7 +403,7 @@ class PSServer:
         The node sends the processed data to the server and the user has to handle
         this processed result in this method. Usually it is merged in some data structure.
 
-        :param node_id: The id of the node that has processed the data and sent the results back to
+        :param node_id: The ID of the node that has processed the data and sent the results back to
                         the server.
         :param result: This is the processed data from the node.
         """

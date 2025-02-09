@@ -103,7 +103,7 @@ def ps_gen_heartbeat_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     The node sends its node_id that the server will check.
     The secret key is used to encode the message.
 
-    :param node_id: The id of the node that sends the heartbeat message.
+    :param node_id: The ID of the node that sends the heartbeat message.
     :param secret_key: A secret key that is used to encode the message.
     :return: The encoded heartbeat message.
     :rtype: bytes
@@ -155,7 +155,7 @@ def ps_gen_init_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     The node registers itself to the server given its own node id.
     The secret key is used to encode the message.
 
-    :param node_id: The node id of the new node.
+    :param node_id: The node ID of the new node.
     :param secret_key: A secret key that is used to encode the message.
     :return: The encoded init message.
     :rtype: bytes
@@ -207,7 +207,7 @@ def ps_gen_result_message(node_id: PSNodeId, secret_key: bytes, new_data: Any) -
     the result back to the server.
     The secret key is used to encode the message.
 
-    :param node_id: The id of the node.
+    :param node_id: The ID of the node.
     :param secret_key: A secret key that is used to encode the message.
     :param new_data: The processed data (result).
     :return: The encoded result message.
@@ -226,7 +226,7 @@ def ps_gen_need_more_data_message(node_id: PSNodeId, secret_key: bytes) -> bytes
     more data to be processed from the server.
     The secret key is used to encode the message.
 
-    :param node_id: The id of the node.
+    :param node_id: The ID of the node.
     :param secret_key: A secret key that is used to encode the message.
     :return: The encoded "need mode data" message.
     :rtype: bytes
