@@ -37,7 +37,7 @@ class PSServer:
     def ps_run(self) -> None:
         """
         This methods uses asyncio.run to call the main loop
-        ([ps_main_loop](ps_server.html#parasnake.ps_server.PSServer.ps_main_loop)).
+        ps_main_loop().
         It is the main entry point for the user code.
         """
 
@@ -55,7 +55,7 @@ class PSServer:
         This method registers a new node with the given node ID
         and sets its heartbeat time to the current time.
 
-        It's called from the [ps_handle_node](ps_server.html#parasnake.ps_server.PSServer.ps_handle_node) method.
+        It's called from the ps_handle_node() method.
 
         :param node_id: The node ID of the new node.
         """
