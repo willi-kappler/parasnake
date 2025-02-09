@@ -62,12 +62,10 @@ def encode_message(message: Any, secret_key: bytes) -> bytes:
     """
     Encodes a message with the given key.
 
-    Args:
-        message: The message to encode.
-        secret_key: A secret key that is known by the server and client.
-
-    Returns:
-        The encoded message.
+    :param message: The message to encode.
+    :param secret_key: A secret key that is known by the server and client.
+    :return: The encoded message.
+    :rtype: bytes
     """
 
     f = Fernet(secret_key)
@@ -83,12 +81,10 @@ def decode_message(message: bytes, secret_key: bytes) -> Any:
     """
     Decodes a message with the given key.
 
-    Args:
-        message: The message to decode.
-        secret_key: A secret key that is known by the server and client.
-
-    Returns:
-        The decoded message.
+    :param message: The message to dencode.
+    :param secret_key: A secret key that is known by the server and client.
+    :return: The dencoded message.
+    :rtype: Any
     """
 
     f = Fernet(secret_key)
@@ -107,12 +103,10 @@ def ps_gen_heartbeat_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     The node sends its node_id that the server will check.
     The secret key is used to encode the message.
 
-    Args:
-        node_id: The id of the node that sends the heartbeat message.
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded heartbeat message.
+    :param node_id: The id of the node that sends the heartbeat message.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded heartbeat message.
+    :rtype: bytes
     """
 
     msg = (PSMessageType.Heartbeat, node_id)
@@ -127,11 +121,9 @@ def ps_gen_heartbeat_message_ok(secret_key: bytes) -> bytes:
     sent in the time limit and contained a valid node id.
     The secret key is used to encode the message.
 
-    Args:
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded "heartbeat OK" message.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded "heartbeat OK" message.
+    :rtype: bytes
     """
 
     msg = PSMessageType.HeartbeatOK
@@ -146,11 +138,9 @@ def ps_gen_heartbeat_message_error(secret_key: bytes) -> bytes:
     sent too late or did not contain a valid node id.
     The secret key is used to encode the message.
 
-    Args:
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded "heartbeat error" message.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded "heartbeat error" message.
+    :rtype: bytes
     """
 
     msg = PSMessageType.HeartbeatError
@@ -165,12 +155,10 @@ def ps_gen_init_message(node_id: PSNodeId, secret_key: bytes) -> bytes:
     The node registers itself to the server given its own node id.
     The secret key is used to encode the message.
 
-    Args:
-        node_id: The node id of the new node.
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded init message.
+    :param node_id: The node id of the new node.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded init message.
+    :rtype: bytes
     """
 
     msg = (PSMessageType.Init, node_id)
@@ -185,12 +173,10 @@ def ps_gen_init_message_ok(init_data: Any, secret_key: bytes) -> bytes:
     The server then can send some initial data to the node, if needed.
     The secret key is used to encode the message.
 
-    Args:
-        init_data: Some data to initialize the node (optional).
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded "init ok" message.
+    :param init_data: Some data to initialize the node (optional).
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded "init ok" message.
+    :rtype: bytes
     """
 
     msg = (PSMessageType.InitOK, init_data)
@@ -204,11 +190,9 @@ def ps_gen_init_message_error(secret_key: bytes) -> bytes:
     This message is only sent when the registration of the new node has failed.
     The secret key is used to encode the message.
 
-    Args:
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded "init error" message.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded "init error" message.
+    :rtype: bytes
     """
 
     msg = PSMessageType.InitError
@@ -223,13 +207,11 @@ def ps_gen_result_message(node_id: PSNodeId, secret_key: bytes, new_data: Any) -
     the result back to the server.
     The secret key is used to encode the message.
 
-    Args:
-        node_id: The id of the node.
-        secret_key: A secret key that is used to encode the message.
-        new_data: The processed data (result).
-
-    Returns:
-        The encoded result message.
+    :param node_id: The id of the node.
+    :param secret_key: A secret key that is used to encode the message.
+    :param new_data: The processed data (result).
+    :return: The encoded result message.
+    :rtype: bytes
     """
 
     msg = (PSMessageType.NewResultFromNode, node_id, new_data)
@@ -244,12 +226,10 @@ def ps_gen_need_more_data_message(node_id: PSNodeId, secret_key: bytes) -> bytes
     more data to be processed from the server.
     The secret key is used to encode the message.
 
-    Args:
-        node_id: The id of the node.
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded "need more data" message.
+    :param node_id: The id of the node.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded "need mode data" message.
+    :rtype: bytes
     """
 
     msg = (PSMessageType.NodeNeedsMoreData, node_id)
@@ -263,12 +243,10 @@ def ps_gen_new_data_message(new_data: Any, secret_key: bytes) -> bytes:
     This message is only sent when the node has asked for more data from the server.
     The secret key is used to encode the message.
 
-    Args:
-        new_data: New data to be processed by the node.
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded "new data" message.
+    :param new_data: New data to be processed by the node.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded "new data" message.
+    :rtype: bytes
     """
 
     msg = (PSMessageType.NewDataFromServer, new_data)
@@ -283,11 +261,9 @@ def ps_gen_result_ok_message(secret_key: bytes) -> bytes:
     and the server has accepted it.
     The secret key is used to encode the message.
 
-    Args:
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded "result ok" message.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded "result ok" message.
+    :rtype: bytes
     """
 
     msg = PSMessageType.ResultOK
@@ -304,11 +280,9 @@ def ps_gen_quit_message(secret_key: bytes) -> bytes:
     The server will wait some more time since not all nodes may have received
     the quit message yet.
 
-    Args:
-        secret_key: A secret key that is used to encode the message.
-
-    Returns:
-        The encoded quit message.
+    :param secret_key: A secret key that is used to encode the message.
+    :return: The encoded quit message.
+    :rtype: bytes
     """
 
     msg = PSMessageType.Quit

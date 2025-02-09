@@ -57,8 +57,7 @@ class PSServer:
 
         It's called from the [ps_handle_node](ps_server.html#parasnake.ps_server.PSServer.ps_handle_node) method.
 
-        Args:
-            node_id: The node ID of the new node.
+        :param node_id: The node id of the new node.
         """
 
         logger.debug("Register new node.")
@@ -71,8 +70,7 @@ class PSServer:
 
         It's called from the ps_handle_node() method.
 
-        Args:
-            node_id: The node ID of the node whose heartbeat time should be updated.
+        :param node_id: The node id of the node whose heartbeat time should be updated.
         """
 
         logger.debug("Update node time.")
@@ -85,9 +83,8 @@ class PSServer:
 
         It's called from the ps_handle_node() method.
 
-        Args:
-            writer: The network socket to write (send) the message to.
-            msg: The message to write (send).
+        :param writer: The network socket to write (send) the message to.
+        :param msg: The message to write (send).
         """
 
         writer.write(msg)
@@ -128,9 +125,8 @@ class PSServer:
             is called with the newly processed data. This method has to be implemented
             by the user. Normally, the data is merged back into some data structure.
 
-        Args:
-            reader: The network socket to read (receive) the node message from.
-            writer: The network socket to write (send) the answer to.
+        :param reader: The network socket to read (receive) the node message from.
+        :param writer: The network socket to write (send) the answer to.
         """
 
         logger.debug("Connection from node.")
@@ -252,11 +248,8 @@ class PSServer:
         Since this call may block, it is run in a separate thread.
         This method is called from ps_handle_node() (Init message).
 
-        Args:
-            node_id: The ID of the node that receives the initialization data.
-
-        Returns:
-            The init data for the given node.
+        :param node_id: The id of the node that receives the initialisation data.
+        :return: The init data for the given node.
         """
 
         return await asyncio.to_thread(self.ps_get_init_data_lock, node_id)
@@ -268,11 +261,8 @@ class PSServer:
         It may block and is called in a separate thread.
         It's called from ps_get_init_data_thread() (Init message).
 
-        Args:
-            node_id: The ID of the node that receives the initialization data.
-
-        Returns:
-            The init data for the given node.
+        :param node_id: The id of the node that receives the initialisation data.
+        :return: The init data for the given node.
         """
 
         with self.lock:
@@ -286,11 +276,8 @@ class PSServer:
         Since it may block, it is called in a separate thread.
         It's called from ps_get_init_data_lock() (Init message).
 
-        Args:
-            node_id: The ID of the node that receives the initialization data.
-
-        Returns:
-            The init data for the given node.
+        :param node_id: The id of the node that receives the initialisation data.
+        :return: The init data for the given node.
         """
 
         # Must be implemented by the user.
@@ -306,11 +293,8 @@ class PSServer:
         Otherwise, it returns the new data to be processed by the node.
         It's called from ps_handle_node() (NodeNeedsMoreData message).
 
-        Args:
-            node_id: The ID of the node that receives the new data.
-
-        Returns:
-            The new data for the given node, or None if the job is done.
+        :param node_id: The id of the node that receives the new data.
+        :return: The new data for the given node.
         """
 
         return await asyncio.to_thread(self.ps_get_new_data_lock, node_id)
@@ -323,11 +307,8 @@ class PSServer:
         If there is no more data to process (=job is done), this method returns None.
         It's called from ps_get_new_data_thread() (NodeNeedsMoreData message).
 
-        Args:
-            node_id: The ID of the node that receives the new data.
-
-        Returns:
-            The new data for the given node, or None if the job is done.
+        :param node_id: The id of the node that receives the new data.
+        :return: The new data for the given node.
         """
 
         with self.lock:
@@ -340,12 +321,8 @@ class PSServer:
         Since this method may block it is run in a separate thread.
         It's called from ps_handle_node() (NewResultFromNode message).
 
-        Args:
-            node_id: The ID of the node that has processed the data and sent the
-            results back to the server.
-
-        Returns:
-            The processed data from the node.
+        :param node_id: The id of the node that has processed the data and sent
+                        the results back to the server.
         """
 
         await asyncio.to_thread(self.ps_process_result_lock, node_id, result)
@@ -356,11 +333,8 @@ class PSServer:
         It may block and is run in a separate thread.
         It's called from ps_process_result_thread() (NewResultFromNode message).
 
-        Args:
-            node_id: The ID of the node that has processed the data and sent the results
-            back to the server.
-        Returns:
-            The processed data from the node.
+        :param node_id: The id of the node that has processed the data and sent
+                        the results back to the server.
         """
 
         with self.lock:
@@ -376,8 +350,8 @@ class PSServer:
         Otherwise it returns False.
         It's called from ps_main_loop().
 
-        Returns:
-            True if the job is finished, False otherwise.
+        :return: True if the job is finished, False otherwise.
+        :rtype: Bool
         """
 
         # Must be implemented by the user.

@@ -31,8 +31,7 @@ class PSNode:
         """
         Initializes the node using the given configuration.
 
-        Args:
-            configuration: The configuration for the node.
+        :param configuration: The configuration for the node.
         """
 
         self.server_address: str = configuration.server_address
@@ -74,11 +73,9 @@ class PSNode:
         The message from the server is decoded and returned.
         This async method is called from ps_main_loop().
 
-        Args:
-            msg: The already encoded message that is sent to the server.
-
-        Returns:
-            The decoded message from the server.
+        :param msg: The already encoded message that is send to the server.
+        :return: The decoded message from the server.
+        :rtype: Any
         """
 
         try:
@@ -218,11 +215,10 @@ class PSNode:
         do the processing in the background so that no other async task is blocked.
         This calls the user-defined ps_process_data() as a new thread.
 
-        Args:
-            data: The new data that has been sent from the server and needs to be processed.
-
-        Returns:
-            The result after processing, which will be sent back to the server.
+        :param data: The new data that has been sent from the server and needs to be
+            processed.
+        :return: The result after the processing, will be sent back to the server.
+        :rtype: Any
         """
 
         return await asyncio.to_thread(self.ps_process_data, data)
@@ -235,8 +231,7 @@ class PSNode:
         This data can be processed here. The user does not have to implement this method
         if the server has no init data.
 
-        Args:
-            data: The initialization data sent by the server (if any).
+        :param data: The initialization data sent by the server (if any).
         """
 
         pass
@@ -248,11 +243,9 @@ class PSNode:
         The user has to implement it to process the new data from the server, and the result will be
         sent back to the server.
 
-        Args:
-            data: The new data from the server that will be processed by this node.
-
-        Returns:
-            The processed data from this node, which will be sent back to the server.
+        :param data: The new data from the server that will be processed by this node.
+        :return: The processed data from this node. Will be sent back to the server.
+        :rtype: Any
         """
 
         # Must be implemented by the user!

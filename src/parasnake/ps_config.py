@@ -31,11 +31,8 @@ class PSConfiguration:
         """
         Load the configuration (JSON format) from the given file name.
 
-        Args:
-            file_name: File name of the configuration.
-
-        Returns:
-            A valid configuration from the given JSON file.
+        :param file_name: File name of the configuration.
+        :return: A valid configuration from the given JSON file.
         """
 
         logger.debug(f"Load configuration from file: {file_name}.")
