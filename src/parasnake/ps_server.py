@@ -25,6 +25,13 @@ logger = logging.getLogger(__name__)
 
 
 class PSServer:
+    """
+    This class describes the server part. The user of this library has to derive
+    from it and implement some or all of the stub methods.
+    In here the connections to each node is managed and the job is split up and
+    distributed to all the nodes.
+    """
+
     def __init__(self, configuration: PSConfiguration):
         self.server_port: int = configuration.server_port
         self.secret_key: bytes = configuration.secret_key

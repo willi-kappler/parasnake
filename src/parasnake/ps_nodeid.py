@@ -16,6 +16,9 @@ import uuid
 
 
 class PSNodeId:
+    """
+    This class defines the ID that each node has. It must be unique.
+    """
     def __init__(self):
         self.id = uuid.uuid4()
 

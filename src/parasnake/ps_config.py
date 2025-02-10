@@ -16,6 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class PSConfiguration:
+    """
+    This class contains all the configuration options.
+    """
+
     def __init__(self, secret_key: str):
         self.server_address: str = "127.0.0.1"
         self.server_port: int = 3100

@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class PSNode:
     """
-    This is the main class that does all coomputation and communication to the server.
+    This is the main class that does all computation and communication to the server.
     The user of this library has to derive from this class in order to add new custom
     code.
     """
