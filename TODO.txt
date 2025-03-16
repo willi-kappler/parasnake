@@ -12,7 +12,6 @@ TODO:
 
 
 
-
 DONE:
 # finish server
 # add config option for quit_counter.
@@ -26,6 +25,7 @@ DONE:
   # Or asyncio.to_thread() ? https://superfastpython.com/asyncio-to_thread/
 # add mandel example.
 # use enums for message types.
+# Write a good summary for the README.
 
 
 
