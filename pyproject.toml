@@ -1,3 +1,6 @@
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project]
 version = "0.1"
 name = "Parasnake"
@@ -28,7 +31,4 @@ Repository = "https://github.com/willi-kappler/parasnake"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[tool.hatch.metadata]
-allow-direct-references = true
 
