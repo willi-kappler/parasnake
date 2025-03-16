@@ -279,7 +279,7 @@ class PSServer:
         """
         This method retrieves (calculates) the initial data for the given node.
 
-        This method must be implemented by the user.
+        This method can be implemented by the user.
         Since it may block, it is called in a separate thread.
         It's called from ps_get_init_data_lock() (Init message).
 
@@ -287,7 +287,7 @@ class PSServer:
         :return: The init data for the given node.
         """
 
-        # Must be implemented by the user.
+        # Can be implemented by the user.
         return None
 
     async def ps_get_new_data_thread(self, node_id: PSNodeId) -> Optional[Any]:
