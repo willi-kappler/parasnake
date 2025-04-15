@@ -3,7 +3,8 @@ Distributed number crunching with Python.
 (Keywords: numeric computing, scientific computing, HPC, distributed, simulation, parallel)
 
 ## Table of contents
-- [Features](#features)
+- [Features](#Features)
+- [Install](#Install)
 - [Introduction](#Introduction)
 - [How to start the application](#How_to_start_the_application)
 - [How does it compare to x?](#How_does_it_compare_to_x)
@@ -21,6 +22,14 @@ Distributed number crunching with Python.
 **Note 1:** *It is still in development and the API may change.*
 
 **Note 2:** *The communication between the server and the nodes is encrypted using a secret key.*
+
+## Install
+
+Parasnake is available via [PyPI](https://pypi.org/project/Parasnake/):
+
+```bash
+pip install Parasnake
+```
 
 ## Introduction
 
