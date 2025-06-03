@@ -149,7 +149,7 @@ class PSServer:
                 case (psm.PSMessageType.Init, node_id):
                     logger.debug("Init message.")
                     if node_id in self.all_nodes:
-                        logger.error("Node ID already registered: {node_id}")
+                        logger.error(f"Node ID already registered: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
                     else:
                         self.ps_register_new_node(node_id)
@@ -161,7 +161,7 @@ class PSServer:
                         self.ps_update_node_time(node_id)
                         await self.ps_write_msg(writer, psm.ps_gen_heartbeat_message_ok(self.secret_key))
                     else:
-                        logger.error("Node ID not registered yet: {node_id}")
+                        logger.error(f"Node ID not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_heartbeat_message_error(self.secret_key))
                 case (psm.PSMessageType.NodeNeedsMoreData, node_id):
                     logger.debug("Node needs more data.")
@@ -170,7 +170,7 @@ class PSServer:
                         new_data = await self.ps_get_new_data_thread(node_id)
                         await self.ps_write_msg(writer, psm.ps_gen_new_data_message(new_data, self.secret_key))
                     else:
-                        logger.error("Node ID not registered yet: {node_id}")
+                        logger.error(f"Node ID not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
                 case (psm.PSMessageType.NewResultFromNode, node_id, result):
                     logger.debug("New result from node.")
@@ -179,7 +179,7 @@ class PSServer:
                         await self.ps_process_result_thread(node_id, result)
                         await self.ps_write_msg(writer, psm.ps_gen_result_ok_message(self.secret_key))
                     else:
-                        logger.error("Node ID not registered yet: {node_id}")
+                        logger.error(f"Node ID not registered yet: {node_id}")
                         await self.ps_write_msg(writer, psm.ps_gen_init_message_error(self.secret_key))
 
         writer.close()
